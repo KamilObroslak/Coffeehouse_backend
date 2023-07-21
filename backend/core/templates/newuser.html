@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Witaj nowy użytkowniku!</title>
+    <style>
+        body {
+            color: white;
+        }
+        h1 {
+            font-size: 24px;
+        }
+        p {
+            font-size: 18px;
+        }
+        .footer {
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    {% block NewUserMessage %}
+    <h1 style="font-size: 48px;">Cześć!</h1>
+    <p>Właśnie zostałeś zarejestrowany i możesz się zalogować!</p>
+    <p class="footer">Wiadomość wygenerowana automatycznie, proszę na nią nie odpowiadać!</p>
+    <p class="footer">Jeśli chcesz usunąć swoje konto, kliknij w ten link:
+        <a href="http://127.0.0.1:8000/userdelete/{{hash}}">kliknij tutaj</a> </p>
+    {% endblock NewUserMessage %}
+</body>
+</html>

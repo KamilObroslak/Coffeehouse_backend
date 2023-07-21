@@ -1,17 +1,14 @@
-import datetime
+from datetime import datetime
 
 import jwt as jwt
 from django.contrib import auth
 from django.contrib.auth.models import Group, User
-from django.shortcuts import redirect, get_object_or_404
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Coffee, Cake, Place, Order, UserToken, OrderCoffee, OrderSnacks, Snacks, OrderCake
-from rest_framework import viewsets, status, mixins
-
-from .serializers import CoffeeSerializer, CakeSerializer, PlaceSerializer, OrderSerializer, UserSerializer
+from .models import UserToken
+from rest_framework import status
 
 
 def create_limited_permissions_group():
@@ -23,26 +20,6 @@ def create_limited_permissions_group():
     group.permissions.set(permissions)
 
     return group
-
-
-class CoffeeViewSet(viewsets.ModelViewSet):
-    queryset = Coffee.objects.all()
-    serializer_class = CoffeeSerializer
-
-
-class CakeViewSet(viewsets.ModelViewSet):
-    queryset = Cake.objects.all()
-    serializer_class = CakeSerializer
-
-
-class PlaceViewSet(viewsets.ModelViewSet):
-    queryset = Place.objects.all()
-    serializer_class = PlaceSerializer
-
-
-class OrderViewSet(viewsets.ModelViewSet):
-    queryset = Order.objects.all()
-    serializer_class = OrderSerializer
 
 
 class UserRegisterView(APIView):
@@ -115,77 +92,9 @@ class UserDeleteView(APIView):
     def delete(self, request, *args, **kwargs):
         email = request.data.get("email")
         instance = User.objects.filter(email=email).first()
-        # user_token = get_object_or_404(UserToken, owner=instance, token=hash_id)
-        # print(email, instance, user_token)
 
         if instance:
-            # if user_token.exits():
             instance.delete()
             return Response({"message": "Object destroyed successfully"})
         else:
             return Response({"message": "Object not found"}, status=status.HTTP_404_NOT_FOUND)
-
-
-class OrderView(APIView):
-    def post(self, request):
-        print(request.data)
-        spot_number = request.data["spot"]
-        total_price = request.data["total_price"]
-        customer_order = request.data["customer_order"]
-        takeaway_order = request.data["takeaway_order"]
-        owner_id = request.data["owner"]
-
-        user = User.objects.get(id=owner_id)
-
-        order = Order.objects.create(
-            spot_id=spot_number,
-            total_price=total_price,
-            takeaway_order=(takeaway_order == "True"),
-            owner=user
-        )
-
-        coffees = customer_order["coffees"]
-        for coffee_data in coffees:
-            coffee_name = coffee_data["name"]
-            coffee_quantity = coffee_data["quantity"]
-            coffee = Coffee.objects.get(name=coffee_name)
-            OrderCoffee.objects.create(
-                order=order,
-                coffee=coffee,
-                quantity=coffee_quantity
-            )
-
-        cakes = customer_order["cakes"]
-        for cake_data in cakes:
-            cake_name = cake_data["name"]
-            cake_quantity = cake_data["quantity"]
-            cake = Cake.objects.get(name=cake_name)
-            OrderCake.objects.create(
-                order=order,
-                cake=cake,
-                quantity=cake_quantity
-            )
-
-        snacks = customer_order["snacks"]
-        for snack_data in snacks:
-            snack_name = snack_data['name']
-            snack_quantity = snack_data["quantity"]
-            snack = Snacks.objects.get(name=snack_name)
-            OrderSnacks.objects.create(
-                order=order,
-                snacks=snack,
-                quantity=snack_quantity
-            )
-
-        return Response({"message": "User created successfully"})
-
-    # return Response({"message": "Invalid request method"}, status=400)
-
-    # def post(self, request):
-    #     serializer = UserSerializer(data=request.data)
-    #     serializer.is_valid(raise_exception=True)
-    #     user = serializer.save()
-    #     group = create_limited_permissions_group()
-    #     user.groups.add(group)
-    #     user.is_staff = True
-    #     user.save()
