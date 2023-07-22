@@ -4,11 +4,17 @@ from .models import Provider, OpenDayProvider, Coffee, Cake, Snacks, Place, Orde
     OrderSnacks, Product
 
 
-class ProviderAdmin(admin.ModelAdmin):
-    list_display = ["id", "name", "owner", "kind", "city", "postcode", "street"]
-    list_filter = ["kind", "city", "postcode"]
-    search_fields = ["id", "name", "owner__username", "kind", "city", "postcode", "street"]
-    readonly_fields = ["owner"]
+class OpenDayProviderInLine(admin.StackedInline):
+    model = OpenDayProvider
+    autocomplete_fields = []
+    extra = 0
+    fields = [('monday', 'monday_from', 'monday_to'),
+              ('tuesday', 'tuesday_from', 'tuesday_to'),
+              ('wednesday', 'wednesday_from', 'wednesday_to'),
+              ('thursday', 'thursday_from', 'thursday_to'),
+              ('friday', 'friday_from', 'friday_to'),
+              ('saturday', 'saturday_from', 'saturday_to'),
+              ('sunday', 'sunday_from', 'sunday_to')]
 
 
 class OpenDayProviderAdmin(admin.ModelAdmin):
@@ -39,11 +45,17 @@ class SnacksAdmin(admin.ModelAdmin):
     readonly_fields = ["id", "owner"]
 
 
+class PlaceInLine(admin.TabularInline):
+    model = Place
+    autocomplete_fields = []
+    extra = 0
+
+
 class PlaceAdmin(admin.ModelAdmin):
-    list_display = ["id", "spot_amount", "name", "availability"]
-    list_filter = ["spot_amount", "name", "availability"]
-    search_fields = ["id", "spot_amount", "name", "availability"]
-    readonly_fields = ["id"]
+    list_display = ["id", "owner", "spot_amount", "name", "availability"]
+    list_filter = ["owner", "spot_amount", "name", "availability"]
+    search_fields = ["id", "owner", "spot_amount", "name", "availability"]
+    readonly_fields = ["id", "owner"]
 
 
 class OrderCoffeeInLine(admin.TabularInline):
@@ -104,7 +116,13 @@ class OrderAdmin(admin.ModelAdmin):
     list_filter = ["spot", "takeaway_order", "status", "order_datatime"]
     search_fields = ["id", "owner__username", "total_price", "takeaway_order", "status", "spot__name"]
     inlines = [OrderCoffeeInLine, OrderCakeInLine, OrderSnacksInLine, OrderHistoryInLine]
-    readonly_fields = ["id", "owner"]
+    readonly_fields = ["id", "owner", "provider"]
+
+
+class ProductInLine(admin.TabularInline):
+    model = Product
+    autocomplete_fields = []
+    extra = 0
 
 
 class ProductAdmin(admin.ModelAdmin):
@@ -114,8 +132,16 @@ class ProductAdmin(admin.ModelAdmin):
     readonly_fields = ["id", "owner"]
 
 
+class ProviderAdmin(admin.ModelAdmin):
+    list_display = ["id", "name", "owner", "kind", "city", "postcode", "street"]
+    list_filter = ["kind", "city", "postcode"]
+    search_fields = ["id", "name", "owner__username", "kind", "city", "postcode", "street"]
+    readonly_fields = ["owner"]
+    inlines = [ProductInLine, PlaceInLine, OpenDayProviderInLine]
+
+
 admin.site.register(Provider, ProviderAdmin)
-admin.site.register(OpenDayProvider, OpenDayProviderAdmin)
+# admin.site.register(OpenDayProvider, OpenDayProviderAdmin)
 admin.site.register(Place, PlaceAdmin)
 admin.site.register(Cake, CakeAdmin)
 admin.site.register(Coffee, CoffeeAdmin)

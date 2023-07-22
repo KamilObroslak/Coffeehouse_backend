@@ -3,6 +3,8 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from client.models import Client
+
 
 class KindProvider(models.IntegerChoices):
     COFFEEHOUSE = 1, _("Coffee house")
@@ -31,36 +33,36 @@ class OpenDayProvider(models.Model):
     owner = models.ForeignKey(Provider, on_delete=models.CASCADE)
 
     monday = models.BooleanField(default=True)
-    monday_from = models.TimeField(default=None)
-    monday_to = models.TimeField(default=None)
+    monday_from = models.TimeField(default=None, blank=True, null=True)
+    monday_to = models.TimeField(default=None, blank=True, null=True)
 
     tuesday = models.BooleanField(default=True)
-    tuesday_from = models.TimeField(default=None)
-    tuesday_to = models.TimeField(default=None)
+    tuesday_from = models.TimeField(default=None, blank=True, null=True)
+    tuesday_to = models.TimeField(default=None, blank=True, null=True)
 
     wednesday = models.BooleanField(default=True)
-    wednesday_from = models.TimeField(default=None)
-    wednesday_to = models.TimeField(default=None)
+    wednesday_from = models.TimeField(default=None, blank=True, null=True)
+    wednesday_to = models.TimeField(default=None, blank=True, null=True)
 
     thursday = models.BooleanField(default=True)
-    thursday_from = models.TimeField(default=None)
-    thursday_to = models.TimeField(default=None)
+    thursday_from = models.TimeField(default=None, blank=True, null=True)
+    thursday_to = models.TimeField(default=None, blank=True, null=True)
 
     friday = models.BooleanField(default=True)
-    friday_from = models.TimeField(default=None)
-    friday_to = models.TimeField(default=None)
+    friday_from = models.TimeField(default=None, blank=True, null=True)
+    friday_to = models.TimeField(default=None, blank=True, null=True)
 
     saturday = models.BooleanField(default=True)
-    saturday_from = models.TimeField(default=None)
-    saturday_to = models.TimeField(default=None)
+    saturday_from = models.TimeField(default=None, blank=True, null=True)
+    saturday_to = models.TimeField(default=None, blank=True, null=True)
 
     sunday = models.BooleanField(default=True)
-    sunday_from = models.TimeField(default=None)
-    sunday_to = models.TimeField(default=None)
+    sunday_from = models.TimeField(default=None, blank=True, null=True)
+    sunday_to = models.TimeField(default=None, blank=True, null=True)
 
 
 class Product(models.Model):
-    name = models.CharField(max_length=256, verbose_name="Coffee")
+    name = models.CharField(max_length=256, verbose_name="Product")
     price = models.FloatField()
     description = models.CharField(max_length=1024, default="", verbose_name="Description", blank=True)
     gluten = models.BooleanField(default=False)
@@ -99,6 +101,7 @@ class Place(models.Model):
     spot_amount = models.IntegerField()
     name = models.CharField(max_length=256, default="Table", verbose_name="Table")
     availability = models.BooleanField(default=True)
+    owner = models.ForeignKey(Provider, on_delete=models.CASCADE, verbose_name="owner")
 
     class Meta:
         verbose_name = "Table"
@@ -121,9 +124,10 @@ class Order(models.Model):
     cakes = models.ManyToManyField(Cake, through='OrderCake', verbose_name="cakes")
     snacks = models.ManyToManyField(Snacks, through='OrderSnacks', verbose_name="snacks")
     takeaway_order = models.BooleanField(default=False)
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="client")
+    owner = models.ForeignKey(Client, on_delete=models.CASCADE, verbose_name="client")
     status = models.IntegerField(choices=OrderStatus.choices, verbose_name=_("status"), null=True)
     order_datatime = models.DateTimeField(verbose_name="order datatime", default=timezone.now)
+    provider = models.ForeignKey(Provider, on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = "Order"

@@ -1,10 +1,9 @@
-from datetime import datetime
+import datetime
 
 import jwt as jwt
 from django.contrib import auth
 from django.contrib.auth.models import Group, User
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework.exceptions import AuthenticationFailed
+
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -51,29 +50,29 @@ class UserRegisterView(APIView):
 
 class UserLoginView(APIView):
     def post(self, request):
+        print(request.data)
         username = request.data.get("username")
-        email = request.data.get("email")
         password = request.data.get("password")
-        password2 = request.data.get("password2")
-
         context = {}
 
-        if password != password2:
-            context["error"] = "Podane hasła nie są takie same. Proszę wprowadzić takie same hasła."
+        if username is None or password is None:
+            context["error"] = "Proszę podać zarówno nazwę użytkownika, jak i hasło."
             return Response(context, status=status.HTTP_400_BAD_REQUEST)
 
-        if User.objects.filter(email=email).exists() or User.objects.filter(username=username).exists():
-            context[
-                "error"] = "Podany email lub nazwa użytkownika już istnieje. Proszę użyć innego adresu email lub nazwy użytkownika."
-            return Response(context, status=status.HTTP_409_CONFLICT)
+        user = auth.authenticate(username=username, password=password)
 
-        user = User.objects.create_user(username=username, email=email, password=password, is_staff=False)
+        if not user:
+            context["error"] = "Podane dane logowania są nieprawidłowe."
+            return Response(context, status=status.HTTP_401_UNAUTHORIZED)
+
+        auth.login(request, user)
 
         payload = {
             'id': user.id,
             'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=60),
             'iat': datetime.datetime.utcnow()
         }
+
         token = jwt.encode(payload, "secret", algorithm="HS256")
 
         response = Response()
@@ -86,21 +85,24 @@ class UserLoginView(APIView):
 
 
 class UserLogoutView(APIView):
-    def post(self):
+    def post(self, request):
         response = Response()
         response.delete_cookie("jwt")
         response.data = {
             "message": "success"
         }
+        return response
 
 
 class UserDeleteView(APIView):
-    def delete(self, request, *args, **kwargs):
+    def delete(self, request, id, *args, **kwargs):
         email = request.data.get("email")
-        instance = User.objects.filter(email=email).first()
-
-        if instance:
-            instance.delete()
-            return Response({"message": "Object destroyed successfully"})
-        else:
-            return Response({"message": "Object not found"}, status=status.HTTP_404_NOT_FOUND)
+        token = request.data.get("token")
+        instance = User.objects.filter(id=id, email=email)
+        check = UserToken.objects.get(token=token)
+        if check:
+            if instance:
+                instance.delete()
+                return Response({"message": "Object destroyed successfully"})
+            else:
+                return Response({"message": "Object not found"}, status=status.HTTP_404_NOT_FOUND)

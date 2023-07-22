@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 from rest_framework import status
 
 from biz.models import Provider, OpenDayProvider
+from client.models import Client
 from core.models import UserToken
 
 import jwt as jwt
@@ -216,16 +217,18 @@ class UserDeleteView(APIView):
             return Response({"message": "Object not found"}, status=status.HTTP_404_NOT_FOUND)
 
 
-class OrderView(APIView):
-    def post(self, request):
+class NewOrderView(APIView):
+    def post(self, request, id):
         print(request.data)
         spot_number = request.data["spot"]
         customer_order = request.data["customer_order"]
         takeaway_order = request.data["takeaway_order"]
         owner_id = request.data["owner"]
+        provider_id = request.data["provider"]
 
-        user = User.objects.get(id=owner_id)
+        client = Client.objects.get(id=owner_id)
         spot = Place.objects.get(id=spot_number)
+        provider = Provider.objects.get(id=provider_id)
         total_price = 0
         price_for_coffees = 0
         price_for_cakes = 0
@@ -235,14 +238,15 @@ class OrderView(APIView):
             spot=spot,
             total_price=total_price,
             takeaway_order=(takeaway_order == "True"),
-            owner=user
+            owner=client,
+            provider=provider
         )
 
         coffees = customer_order["coffees"]
         for coffee_data in coffees:
             coffee_name = coffee_data["name"]
             coffee_quantity = coffee_data["quantity"]
-            coffee = Coffee.objects.get(name=coffee_name)
+            coffee = Coffee.objects.get(name=coffee_name, owner=provider)
             price_for_coffees += coffee_quantity * coffee.price
             print(price_for_coffees)
             OrderCoffee.objects.create(
@@ -255,7 +259,7 @@ class OrderView(APIView):
         for cake_data in cakes:
             cake_name = cake_data["name"]
             cake_quantity = cake_data["quantity"]
-            cake = Cake.objects.get(name=cake_name)
+            cake = Cake.objects.get(name=cake_name, owner=provider)
             price_for_cakes += cake_quantity * cake.price
             print(price_for_cakes)
             OrderCake.objects.create(
@@ -268,7 +272,7 @@ class OrderView(APIView):
         for snack_data in snacks:
             snack_name = snack_data['name']
             snack_quantity = snack_data["quantity"]
-            snack = Snacks.objects.get(name=snack_name)
+            snack = Snacks.objects.get(name=snack_name, owner=provider)
             price_for_snacks += snack_quantity * snack.price
             print(price_for_snacks)
             OrderSnacks.objects.create(
@@ -286,7 +290,7 @@ class OrderView(APIView):
 
 
 class OrderUpdateView(APIView):
-    def post(self, request, id):
+    def post(self, request, id, order):
         print(request.data)
         token = request.data["token"]
         new_status = request.data["new_status"]
@@ -294,11 +298,11 @@ class OrderUpdateView(APIView):
         user = User.objects.get(id=user)
         check = UserToken.objects.get(owner=user, token=token)
         if check:
-            order = Order.objects.get(id=id)
+            order_obj = Order.objects.get(id=order)
             now = datetime.now()
-            order.status = new_status
-            order.save()
-            order_history = OrderHistory.objects.create(order_id=order, time_of_change=now, status=new_status)
+            order_obj.status = new_status
+            order_obj.save()
+            order_history = OrderHistory.objects.create(order_id=order_obj, time_of_change=now, status=new_status)
             order_history.save()
             return Response({"message": "Order has been changed"})
         else:
