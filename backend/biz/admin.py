@@ -22,24 +22,28 @@ class CoffeeAdmin(admin.ModelAdmin):
     list_display = ["id", "name", "owner", "price", "description", "gluten", "active"]
     list_filter = ["name", "gluten"]
     search_fields = ["id", "name", "price", "description", "gluten"]
+    readonly_fields = ["id", "owner"]
 
 
 class CakeAdmin(admin.ModelAdmin):
     list_display = ["id", "name", "price", "description", "gluten"]
     list_filter = ["name", "gluten"]
     search_fields = ["id", "name", "price", "description", "gluten"]
+    readonly_fields = ["id", "owner"]
 
 
 class SnacksAdmin(admin.ModelAdmin):
     list_display = ["id", "name", "price", "description", "gluten"]
     list_filter = ["name", "gluten"]
     search_fields = ["id", "name", "price", "description", "gluten"]
+    readonly_fields = ["id", "owner"]
 
 
 class PlaceAdmin(admin.ModelAdmin):
     list_display = ["id", "spot_amount", "name", "availability"]
     list_filter = ["spot_amount", "name", "availability"]
     search_fields = ["id", "spot_amount", "name", "availability"]
+    readonly_fields = ["id"]
 
 
 class OrderCoffeeInLine(admin.TabularInline):

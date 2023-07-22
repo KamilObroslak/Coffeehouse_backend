@@ -34,38 +34,24 @@ def create_limited_permissions_group():
 
 
 class BusinessRegisterView(APIView):
-    def post(self, request):
+    def post(self, request, id):
         print(request.data)
         print("test")
         context = {}
         if request.method == "POST":
-            try:
-                user = User.objects.get(username=request.data["username"])
-                context["error"] = "Podana email lub login już istnieje! Proszę użyć innego adresu!"
-                return Response(context)
-            except User.DoesNotExist:
-                if request.data["password"] != request.data["password2"]:
-                    context["error"] = "Podane hasła są takie same! Proszę wprowadzić takie same hasła!"
-                    return Response(context)
-                else:
-                    user = User.objects.create_user(username=request.data["username"],
-                                                    email=request.data["email"],
-                                                    password=request.data["password"],
-                                                    is_staff=False)
-                    provider = Provider.objects.create(name=request.data["business_name"],
-                                                       city=request.data["business_city"],
-                                                       postcode=request.data["business_postcode"],
-                                                       street=request.data["business_street"],
-                                                       kind=request.data["business_kind"],
-                                                       owner=user,
-                                                       description=request.data["business_description"],
-                                                       facebook_link=request.data["business_facebook_link"],
-                                                       instagram_link=request.data["business_instagram_link"])
-                    provider.save()
-                    token = UserToken(owner=user)
-                    token.save()
-                    auth.login(request, user)
-                    return Response({"message": "User created successfully"})
+            user = User.objects.get(id=id)
+            provider = Provider.objects.create(name=request.data["business_name"],
+                                               city=request.data["business_city"],
+                                               postcode=request.data["business_postcode"],
+                                               street=request.data["business_street"],
+                                               kind=request.data["business_kind"],
+                                               owner=user,
+                                               description=request.data["business_description"],
+                                               facebook_link=request.data["business_facebook_link"],
+                                               instagram_link=request.data["business_instagram_link"])
+            provider.save()
+
+            return Response({"message": "User created successfully"})
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -239,13 +225,14 @@ class OrderView(APIView):
         owner_id = request.data["owner"]
 
         user = User.objects.get(id=owner_id)
+        spot = Place.objects.get(id=spot_number)
         total_price = 0
         price_for_coffees = 0
         price_for_cakes = 0
         price_for_snacks = 0
 
         order = Order.objects.create(
-            spot_id=spot_number,
+            spot=spot,
             total_price=total_price,
             takeaway_order=(takeaway_order == "True"),
             owner=user

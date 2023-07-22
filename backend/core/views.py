@@ -3,6 +3,7 @@ from datetime import datetime
 import jwt as jwt
 from django.contrib import auth
 from django.contrib.auth.models import Group, User
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -40,7 +41,7 @@ class UserRegisterView(APIView):
                     user = User.objects.create_user(username=request.data["username"],
                                                     email=request.data["email"],
                                                     password=request.data["password"],
-                                                    is_staff=True)
+                                                    is_staff=False)
                     token = UserToken(owner=user)
                     token.save()
                     auth.login(request, user)
@@ -50,27 +51,32 @@ class UserRegisterView(APIView):
 
 class UserLoginView(APIView):
     def post(self, request):
-        username = request.data["username"]
-        password = request.data["password"]
+        username = request.data.get("username")
+        email = request.data.get("email")
+        password = request.data.get("password")
+        password2 = request.data.get("password2")
 
-        user = User.objects.filter(username=username).first()
+        context = {}
 
-        if user is None:
-            raise AuthenticationFailed("Incorrect login details!")
+        if password != password2:
+            context["error"] = "Podane hasła nie są takie same. Proszę wprowadzić takie same hasła."
+            return Response(context, status=status.HTTP_400_BAD_REQUEST)
 
-        if not user.check_password(password):
-            raise AuthenticationFailed("Incorrect login details!")
+        if User.objects.filter(email=email).exists() or User.objects.filter(username=username).exists():
+            context[
+                "error"] = "Podany email lub nazwa użytkownika już istnieje. Proszę użyć innego adresu email lub nazwy użytkownika."
+            return Response(context, status=status.HTTP_409_CONFLICT)
+
+        user = User.objects.create_user(username=username, email=email, password=password, is_staff=False)
 
         payload = {
             'id': user.id,
             'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=60),
             'iat': datetime.datetime.utcnow()
         }
-
         token = jwt.encode(payload, "secret", algorithm="HS256")
 
         response = Response()
-
         response.set_cookie(key="jwt", value=token, httponly=True)
         response.data = {
             "jwt": token

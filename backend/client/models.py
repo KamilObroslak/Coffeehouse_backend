@@ -5,10 +5,10 @@ from django.utils.translation import gettext_lazy as _
 
 class Client(models.Model):
     phone = models.IntegerField(unique=True)
-    city = models.CharField(max_length=256, verbose_name=_("city"))
-    postcode = models.CharField(max_length=256, verbose_name=_("postcode"))
-    street = models.CharField(max_length=256, verbose_name=_("street"))
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="owner")
+    city = models.CharField(max_length=256, verbose_name=_("city"),blank=True)
+    postcode = models.CharField(max_length=256, verbose_name=_("postcode"), blank=True)
+    street = models.CharField(max_length=256, verbose_name=_("street"), blank=True)
+    owner = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name="owner")
 
     class Meta:
         verbose_name = "Client"

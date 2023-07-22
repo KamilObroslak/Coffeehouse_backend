@@ -62,7 +62,7 @@ class OpenDayProvider(models.Model):
 class Product(models.Model):
     name = models.CharField(max_length=256, verbose_name="Coffee")
     price = models.FloatField()
-    description = models.CharField(max_length=1024, default="", verbose_name="Description")
+    description = models.CharField(max_length=1024, default="", verbose_name="Description", blank=True)
     gluten = models.BooleanField(default=False)
     owner = models.ForeignKey(Provider, on_delete=models.CASCADE, verbose_name="owner")
     active = models.BooleanField(default=True)
