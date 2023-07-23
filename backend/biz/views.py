@@ -1,9 +1,4 @@
 from datetime import datetime
-from django.contrib.auth.models import User
-from django.contrib import auth
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework import status
 
 from biz.models import Provider, OpenDayProvider
 from client.models import Client
@@ -60,63 +55,120 @@ class UpdateHours(APIView):
     def post(self, request, id):
         print(request.data)
         print("test")
+        try:
+            x = OpenDayProvider.objects.get(owner=id)
 
-        owner = Provider.objects.get(id=id)
-        monday = request.data["monday"]
-        monday_from = request.data["monday_from"]
-        monday_to = request.data["monday_to"]
+            monday = request.data["monday"]
+            monday_from = request.data["monday_from"]
+            monday_to = request.data["monday_to"]
 
-        tuesday = request.data["tuesday"]
-        tuesday_from = request.data["tuesday_from"]
-        tuesday_to = request.data["tuesday_to"]
+            tuesday = request.data["tuesday"]
+            tuesday_from = request.data["tuesday_from"]
+            tuesday_to = request.data["tuesday_to"]
 
-        wednesday = request.data["wednesday"]
-        wednesday_from = request.data["wednesday_from"]
-        wednesday_to = request.data["wednesday_to"]
+            wednesday = request.data["wednesday"]
+            wednesday_from = request.data["wednesday_from"]
+            wednesday_to = request.data["wednesday_to"]
 
-        thursday = request.data["thursday"]
-        thursday_from = request.data["thursday_from"]
-        thursday_to = request.data["thursday_to"]
+            thursday = request.data["thursday"]
+            thursday_from = request.data["thursday_from"]
+            thursday_to = request.data["thursday_to"]
 
-        friday = request.data["friday"]
-        friday_from = request.data["friday_from"]
-        friday_to = request.data["friday_to"]
+            friday = request.data["friday"]
+            friday_from = request.data["friday_from"]
+            friday_to = request.data["friday_to"]
 
-        saturday = request.data["saturday"]
-        saturday_from = request.data["saturday_from"]
-        saturday_to = request.data["saturday_to"]
+            saturday = request.data["saturday"]
+            saturday_from = request.data["saturday_from"]
+            saturday_to = request.data["saturday_to"]
 
-        sunday = request.data["sunday"]
-        sunday_from = request.data["sunday_from"]
-        sunday_to = request.data["sunday_to"]
+            sunday = request.data["sunday"]
+            sunday_from = request.data["sunday_from"]
+            sunday_to = request.data["sunday_to"]
 
-        days_hours = OpenDayProvider.objects.create(
-            owner=owner,
-            monday=monday,
-            monday_from=monday_from,
-            monday_to=monday_to,
-            tuesday=tuesday,
-            tuesday_from=tuesday_from,
-            tuesday_to=tuesday_to,
-            wednesday=wednesday,
-            wednesday_from=wednesday_from,
-            wednesday_to=wednesday_to,
-            thursday=thursday,
-            thursday_from=thursday_from,
-            thursday_to=thursday_to,
-            friday=friday,
-            friday_from=friday_from,
-            friday_to=friday_to,
-            saturday=saturday,
-            saturday_from=saturday_from,
-            saturday_to=saturday_to,
-            sunday=sunday,
-            sunday_from=sunday_from,
-            sunday_to=sunday_to
-        )
-        days_hours.save()
+            x.monday = monday
+            x.monday_from = monday_from
+            x.monday_to = monday_to
+            x.tuesday = tuesday
+            x.tuesday_from = tuesday_from
+            x.tuesday_to = tuesday_to
+            x.wednesday = wednesday
+            x.wednesday_from = wednesday_from
+            x.wednesday_to = wednesday_to
+            x.thursday = thursday
+            x.thursday_from = thursday_from
+            x.thursday_to = thursday_to
+            x.friday = friday
+            x.friday_from = friday_from
+            x.friday_to = friday_to
+            x.saturday = saturday
+            x.saturday_from = saturday_from
+            x.saturday_to = saturday_to
+            x.sunday = sunday
+            x.sunday_from = sunday_from
+            x.sunday_to = sunday_to
+            x.save()
 
-        return Response({"message": "The data has been saved"})
+            return Response({"message": "The data has been saved"})
+
+        except OpenDayProvider.DoesNotExist:
+
+            owner = Provider.objects.get(id=id)
+            monday = request.data["monday"]
+            monday_from = request.data["monday_from"]
+            monday_to = request.data["monday_to"]
+
+            tuesday = request.data["tuesday"]
+            tuesday_from = request.data["tuesday_from"]
+            tuesday_to = request.data["tuesday_to"]
+
+            wednesday = request.data["wednesday"]
+            wednesday_from = request.data["wednesday_from"]
+            wednesday_to = request.data["wednesday_to"]
+
+            thursday = request.data["thursday"]
+            thursday_from = request.data["thursday_from"]
+            thursday_to = request.data["thursday_to"]
+
+            friday = request.data["friday"]
+            friday_from = request.data["friday_from"]
+            friday_to = request.data["friday_to"]
+
+            saturday = request.data["saturday"]
+            saturday_from = request.data["saturday_from"]
+            saturday_to = request.data["saturday_to"]
+
+            sunday = request.data["sunday"]
+            sunday_from = request.data["sunday_from"]
+            sunday_to = request.data["sunday_to"]
+
+            days_hours = OpenDayProvider.objects.create(
+                owner=owner,
+                monday=monday,
+                monday_from=monday_from,
+                monday_to=monday_to,
+                tuesday=tuesday,
+                tuesday_from=tuesday_from,
+                tuesday_to=tuesday_to,
+                wednesday=wednesday,
+                wednesday_from=wednesday_from,
+                wednesday_to=wednesday_to,
+                thursday=thursday,
+                thursday_from=thursday_from,
+                thursday_to=thursday_to,
+                friday=friday,
+                friday_from=friday_from,
+                friday_to=friday_to,
+                saturday=saturday,
+                saturday_from=saturday_from,
+                saturday_to=saturday_to,
+                sunday=sunday,
+                sunday_from=sunday_from,
+                sunday_to=sunday_to
+            )
+            days_hours.save()
+
+            return Response({"message": "The data has been saved"})
 
 
 class CoffeeViewSet(viewsets.ModelViewSet):
@@ -329,6 +381,42 @@ class AddCoffeeView(APIView):
         return Response({"message": "Coffee has been saved"})
 
 
+class EditCoffeeView(APIView):
+    def post(self, request, id, coffee):
+        print(request.data)
+        name = request.data["name"]
+        price = request.data["price"]
+        description = request.data["description"]
+        gluten = request.data["gluten"]
+        active = request.data["active"]
+
+        x = Coffee.objects.get(id=coffee)
+
+        x.name = name
+        x.price = price
+        x.description = description
+        x.gluten = gluten
+        x.active = active
+        x.save()
+
+        return Response({"message": "The data has been saved"})
+
+
+class DeleteCoffeeView(APIView):
+    def delete(self, request, id, coffee):
+        print(request.data)
+        token = request.data["token"]
+        x = Coffee.objects.get(id=coffee)
+        check = UserToken.objects.get(owner=id, token=token)
+        if check:
+            if x:
+                x.delete()
+                return Response({"message": "Object destroyed successfully"})
+            else:
+                return Response({"message": "Object not found"}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"message": "Object not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
 class AddCakeView(APIView):
     def post(self, request, id):
         print(request.data)
@@ -349,6 +437,42 @@ class AddCakeView(APIView):
         return Response({"message": "Cake has been saved"})
 
 
+class EditCakeView(APIView):
+    def post(self, request, id, cake):
+        print(request.data)
+        name = request.data["name"]
+        price = request.data["price"]
+        description = request.data["description"]
+        gluten = request.data["gluten"]
+        active = request.data["active"]
+
+        x = Cake.objects.get(id=cake)
+
+        x.name = name
+        x.price = price
+        x.description = description
+        x.gluten = gluten
+        x.active = active
+        x.save()
+
+        return Response({"message": "The data has been saved"})
+
+
+class DeleteCakeView(APIView):
+    def delete(self, request, id, cake):
+        print(request.data)
+        token = request.data["token"]
+        x = Cake.objects.get(id=cake)
+        check = UserToken.objects.get(owner=id, token=token)
+        if check:
+            if x:
+                x.delete()
+                return Response({"message": "Object destroyed successfully"})
+            else:
+                return Response({"message": "Object not found"}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"message": "Object not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
 class AddSnackView(APIView):
     def post(self, request, id):
         print(request.data)
@@ -367,3 +491,89 @@ class AddSnackView(APIView):
                                       active=active)
         snack.save()
         return Response({"message": "Snack has been saved"})
+
+
+class EditSnackView(APIView):
+    def post(self, request, id, snack):
+        print(request.data)
+        name = request.data["name"]
+        price = request.data["price"]
+        description = request.data["description"]
+        gluten = request.data["gluten"]
+        active = request.data["active"]
+
+        x = Snacks.objects.get(id=snack)
+
+        x.name = name
+        x.price = price
+        x.description = description
+        x.gluten = gluten
+        x.active = active
+        x.save()
+
+        return Response({"message": "The data has been saved"})
+
+
+class DeleteSnackView(APIView):
+    def delete(self, request, id, snack):
+        print(request.data)
+        token = request.data["token"]
+        x = Snacks.objects.get(id=snack)
+        check = UserToken.objects.get(owner=id, token=token)
+        if check:
+            if x:
+                x.delete()
+                return Response({"message": "Object destroyed successfully"})
+            else:
+                return Response({"message": "Object not found"}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"message": "Object not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+class AddPlaceView(APIView):
+    def post(self, request, id):
+        print(request.data)
+        spot_amount = request.data["spot_amount"]
+        name = request.data["name"]
+        availability = request.data["availability"]
+        owner = Provider.objects.get(id=id)
+
+        place = Place.objects.create(spot_amount=spot_amount,
+                                     name=name,
+                                     availability=availability,
+                                     owner=owner)
+        place.save()
+        return Response({"message": "Snack has been saved"})
+
+
+class EditPlaceView(APIView):
+    def post(self, request, id, place):
+        print(request.data)
+        spot_amount = request.data["spot_amount"]
+        name = request.data["name"]
+        availability = request.data["availability"]
+        owner = Provider.objects.get(id=id)
+
+        x = Place.objects.get(id=place)
+
+        x.spot_amount = spot_amount
+        x.name = name
+        x.availability = availability
+        x.owner = owner
+        x.save()
+
+        return Response({"message": "The data has been saved"})
+
+
+class DeletePlaceView(APIView):
+    def delete(self, request, id, place):
+        print(request.data)
+        token = request.data["token"]
+        x = Place.objects.get(id=place)
+        check = UserToken.objects.get(owner=id, token=token)
+        if check:
+            if x:
+                x.delete()
+                return Response({"message": "Object destroyed successfully"})
+            else:
+                return Response({"message": "Object not found"}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"message": "Object not found"}, status=status.HTTP_404_NOT_FOUND)

@@ -141,7 +141,7 @@ class ProviderAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Provider, ProviderAdmin)
-# admin.site.register(OpenDayProvider, OpenDayProviderAdmin)
+admin.site.register(OpenDayProvider, OpenDayProviderAdmin)
 admin.site.register(Place, PlaceAdmin)
 admin.site.register(Cake, CakeAdmin)
 admin.site.register(Coffee, CoffeeAdmin)
