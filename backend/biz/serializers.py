@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from .models import Coffee, Cake, Order, Place, Provider, OpenDayProvider, Product, Snacks, OrderCoffee, OrderCake, \
-    OrderSnacks, OrderHistory
+from .models import Coffee, Cake, Order, Place, Provider, OpenDayProvider,\
+    Product, Snacks, OrderCoffee, OrderCake, OrderSnacks, OrderHistory
 
 user = get_user_model()
 

@@ -4,8 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from client.models import Client
-
-from core.serializers import ClientSerializer
+from client.serializers import ClientSerializer
 
 
 class ClientRegisterView(APIView):

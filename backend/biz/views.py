@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from biz.models import Provider, OpenDayProvider, Product, OrderStatus
+from biz.models import Provider, OpenDayProvider, Product
 from client.models import Client
 from core.models import UserToken
 
@@ -16,8 +16,9 @@ from .models import Coffee, Cake, Place, Order, OrderCoffee, \
 from rest_framework import viewsets, status
 
 from .serializers import CoffeeSerializer, CakeSerializer, OpenDayProviderSerializer, \
-    ProductSerializer, ProviderSerializer, SnacksSerializer, PlaceSerializer, OrderSerializer, OrderCoffeeSerializer, \
-    OrderCakeSerializer, OrderSnackSerializer, OrderHistorySerializer
+    ProductSerializer, ProviderSerializer, SnacksSerializer, PlaceSerializer,\
+    OrderSerializer, OrderCoffeeSerializer, OrderCakeSerializer,\
+    OrderSnackSerializer, OrderHistorySerializer
 
 
 def create_limited_permissions_group():
