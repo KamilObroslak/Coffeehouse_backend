@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from biz.models import Provider, OpenDayProvider
+from biz.models import Provider, OpenDayProvider, Product, OrderStatus
 from client.models import Client
 from core.models import UserToken
 
@@ -15,7 +15,9 @@ from .models import Coffee, Cake, Place, Order, OrderCoffee, \
     OrderSnacks, Snacks, OrderCake, OrderHistory
 from rest_framework import viewsets, status
 
-from .serializers import CoffeeSerializer, CakeSerializer, PlaceSerializer, OrderSerializer
+from .serializers import CoffeeSerializer, CakeSerializer, OpenDayProviderSerializer, \
+    ProductSerializer, ProviderSerializer, SnacksSerializer, PlaceSerializer, OrderSerializer, OrderCoffeeSerializer, \
+    OrderCakeSerializer, OrderSnackSerializer, OrderHistorySerializer
 
 
 def create_limited_permissions_group():
@@ -49,6 +51,11 @@ class BusinessRegisterView(APIView):
 
             return Response({"message": "User created successfully"})
         return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+class BusinessViewSet(viewsets.ModelViewSet):
+    queryset = Provider.objects.all()
+    serializer_class = ProviderSerializer
 
 
 class UpdateHours(APIView):
@@ -171,6 +178,16 @@ class UpdateHours(APIView):
             return Response({"message": "The data has been saved"})
 
 
+class OpenDayProviderViewSet(viewsets.ModelViewSet):
+    queryset = OpenDayProvider.objects.all()
+    serializer_class = OpenDayProviderSerializer
+
+
+class ProductViewSet(viewsets.ModelViewSet):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+
+
 class CoffeeViewSet(viewsets.ModelViewSet):
     queryset = Coffee.objects.all()
     serializer_class = CoffeeSerializer
@@ -181,14 +198,44 @@ class CakeViewSet(viewsets.ModelViewSet):
     serializer_class = CakeSerializer
 
 
+class SnacksViewSet(viewsets.ModelViewSet):
+    queryset = Snacks.objects.all()
+    serializer_class = SnacksSerializer
+
+
 class PlaceViewSet(viewsets.ModelViewSet):
     queryset = Place.objects.all()
     serializer_class = PlaceSerializer
 
 
+# class OrderStatusViewSet(viewsets.ModelViewSet):
+#     queryset = OrderStatus.objects.all()
+#     serializer_class = OrderStatusSerializer
+
+
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
+
+
+class OrderCoffeeSet(viewsets.ModelViewSet):
+    queryset = OrderCoffee.objects.all()
+    serializer_class = OrderCoffeeSerializer
+
+
+class OrderCakeSet(viewsets.ModelViewSet):
+    queryset = OrderCake.objects.all()
+    serializer_class = OrderCakeSerializer
+
+
+class OrderSnackSet(viewsets.ModelViewSet):
+    queryset = OrderSnacks.objects.all()
+    serializer_class = OrderSnackSerializer
+
+
+class OrderHistorySet(viewsets.ModelViewSet):
+    queryset = OrderHistory.objects.all()
+    serializer_class = OrderHistorySerializer
 
 
 class UserRegisterView(APIView):

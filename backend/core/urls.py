@@ -3,12 +3,28 @@ from rest_framework import routers
 
 from biz.views import BusinessRegisterView, UpdateHours, AddCoffeeView, AddCakeView, AddSnackView, NewOrderView, \
     OrderUpdateView, EditCoffeeView, EditCakeView, EditSnackView, DeleteCoffeeView, DeleteCakeView, DeleteSnackView, \
-    AddPlaceView, EditPlaceView, DeletePlaceView
-from client.views import ClientRegisterView
+    AddPlaceView, EditPlaceView, DeletePlaceView, BusinessViewSet, OpenDayProviderViewSet, ProductViewSet, \
+    CoffeeViewSet, CakeViewSet, SnacksViewSet, PlaceViewSet, OrderViewSet, OrderCoffeeSet, OrderCakeSet, OrderSnackSet, \
+    OrderHistorySet
+from client.views import ClientRegisterView, ClientViewSet
 from .views import UserRegisterView, UserLoginView, \
     UserLogoutView, UserDeleteView
 
 router = routers.DefaultRouter()
+router.register(r"clients", ClientViewSet)
+router.register(r"providers", BusinessViewSet)
+router.register(r"opendayproviders", OpenDayProviderViewSet)
+router.register(r"products", ProductViewSet)
+router.register(r"coffees", CoffeeViewSet)
+router.register(r"cakes", CakeViewSet)
+router.register(r"snacks", SnacksViewSet)
+router.register(r"places", PlaceViewSet)
+# router.register(r"orderstatus", OrderStatusViewSet)
+router.register(r"orders", OrderViewSet)
+router.register(r"coffeeorder", OrderCoffeeSet)
+router.register(r"cakeorder", OrderCakeSet)
+router.register(r"snackorder", OrderSnackSet)
+router.register(r"order/history", OrderHistorySet)
 
 urlpatterns = [
     path("api/", include(router.urls)),

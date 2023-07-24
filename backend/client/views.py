@@ -1,12 +1,11 @@
-from django.contrib import auth
 from django.contrib.auth.models import User
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework import status
+from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from client.models import Client
-from core.models import UserToken
+
+from core.serializers import ClientSerializer
 
 
 class ClientRegisterView(APIView):
@@ -26,3 +25,8 @@ class ClientRegisterView(APIView):
                 return Response({"message": "User created successfully"})
         except:
             return Response({"message": "User already exists"})
+
+
+class ClientViewSet(viewsets.ModelViewSet):
+    queryset = Client.objects.all()
+    serializer_class = ClientSerializer
