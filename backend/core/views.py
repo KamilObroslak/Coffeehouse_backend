@@ -3,12 +3,11 @@ import datetime
 import jwt as jwt
 from django.contrib import auth
 from django.contrib.auth.models import Group, User
-from django.http import HttpRequest
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from biz.models import Provider, Coffee, Product
+from biz.models import Provider, Product
 from biz.serializers import ProviderSerializer, CoffeeSerializer
 from .models import UserToken
 from rest_framework import status
@@ -79,14 +78,15 @@ class UserLoginView(APIView):
         token = jwt.encode(payload, "secret", algorithm="HS256")
 
         provider = User.objects.get(id=user.id)
+        business = None
+        product = None
 
         try:
             business = Provider.objects.filter(owner=provider.id)
             for i in business:
                 product = Product.objects.filter(owner=i)
         except Provider.DoesNotExist:
-            business = None
-            product = None
+            pass
 
         response = Response({
             "user_id": user.id,

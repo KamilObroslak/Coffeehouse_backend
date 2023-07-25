@@ -3,6 +3,8 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from biz.models import Provider
+from biz.serializers import ProviderSerializer, ProviderForClientSerializer
 from client.models import Client
 from client.serializers import ClientSerializer
 
@@ -29,3 +31,12 @@ class ClientRegisterView(APIView):
 class ClientViewSet(viewsets.ModelViewSet):
     queryset = Client.objects.all()
     serializer_class = ClientSerializer
+
+
+class ProvidersForMe(APIView):
+    def get(self, request, id):
+        print(request.data)
+        print("test")
+        providers = Provider.objects.all()
+        serializer = ProviderForClientSerializer(providers, many=True)
+        return Response(serializer.data)

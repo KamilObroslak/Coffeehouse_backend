@@ -26,6 +26,13 @@ class ProviderSerializer(serializers.HyperlinkedModelSerializer):
         return obj.owner.username
 
 
+class ProviderForClientSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Provider
+        fields = ["id", "name", "city", "postcode", "street",
+                  "kind", "description", "facebook_link", "instagram_link"]
+
+
 class OpenDayProviderSerializer(serializers.HyperlinkedModelSerializer):
     owner = serializers.SerializerMethodField()
 

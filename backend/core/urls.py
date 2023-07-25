@@ -6,7 +6,7 @@ from biz.views import BusinessRegisterView, UpdateHours, AddCoffeeView, AddCakeV
     AddPlaceView, EditPlaceView, DeletePlaceView, BusinessViewSet, OpenDayProviderViewSet, ProductViewSet, \
     CoffeeViewSet, CakeViewSet, SnacksViewSet, PlaceViewSet, OrderViewSet, OrderCoffeeSet, OrderCakeSet, OrderSnackSet, \
     OrderHistorySet
-from client.views import ClientRegisterView, ClientViewSet
+from client.views import ClientRegisterView, ClientViewSet, ProvidersForMe
 from .views import UserRegisterView, UserLoginView, \
     UserLogoutView, UserDeleteView
 
@@ -41,6 +41,7 @@ urlpatterns = [
     path("user_register/<id>/client/", ClientRegisterView.as_view()), #OK ?
     path("client/<id>/neworder", NewOrderView.as_view()), #OK
     path("client/<id>/updateorder/<order>", OrderUpdateView.as_view()), #OK
+    path("client/<id>/places/", ProvidersForMe.as_view()),
 
     # Business part
     path("user_register/<id>/biz/", BusinessRegisterView.as_view()),  # OK
