@@ -318,13 +318,13 @@ class UserDeleteView(APIView):
 
 
 class NewOrderView(APIView):
-    def post(self, request, id):
+    def post(self, request, client, provider, spot):
         print(request.data)
-        spot_number = request.data["spot"]
+        spot_number = spot
         customer_order = request.data["customer_order"]
         takeaway_order = request.data["takeaway_order"]
-        owner_id = request.data["owner"]
-        provider_id = request.data["provider"]
+        owner_id = client
+        provider_id = provider
 
         client = Client.objects.get(id=owner_id)
         spot = Place.objects.get(id=spot_number)

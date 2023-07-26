@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.urls import reverse
+from django.utils.html import format_html
 
 from .models import Provider, OpenDayProvider, Coffee, Cake, Snacks, Place, Order, OrderHistory, OrderCoffee, OrderCake, \
     OrderSnacks, Product
@@ -20,7 +22,8 @@ class OpenDayProviderInLine(admin.StackedInline):
 class OpenDayProviderAdmin(admin.ModelAdmin):
     list_display = ["id", "owner"]
     list_filter = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
-    search_fields = ["id", "owner__username", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+    search_fields = ["id", "owner__username", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday",
+                     "sunday"]
     readonly_fields = ["owner", "id"]
 
 
@@ -111,10 +114,18 @@ class OrderHistoryAdmin(admin.ModelAdmin):
     readonly_fields = ["order_id", "time_of_change"]
 
 
+class OrderInLine(admin.TabularInline):
+    model = Order
+    autocomplete_fields = []
+    extra = 0
+    readonly_fields = ["id", "spot", "total_price", "takeaway_order", "status",
+                       "order_datatime", "provider"]
+
+
 class OrderAdmin(admin.ModelAdmin):
     list_display = ["id", "owner", "total_price", "takeaway_order", "spot", "status", "order_datatime"]
     list_filter = ["spot", "takeaway_order", "status", "order_datatime"]
-    search_fields = ["id", "owner__username", "total_price", "takeaway_order", "status", "spot__name"]
+    search_fields = ["id", "provider__name", "total_price", "takeaway_order", "status", "spot__name"]
     inlines = [OrderCoffeeInLine, OrderCakeInLine, OrderSnacksInLine, OrderHistoryInLine]
     readonly_fields = ["id", "owner", "provider"]
 

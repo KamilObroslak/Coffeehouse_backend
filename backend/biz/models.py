@@ -20,6 +20,9 @@ class Provider(models.Model):
     description = models.CharField(max_length=2048, verbose_name="description", default="")
     facebook_link = models.CharField(max_length=512, verbose_name="facebook link", default="")
     instagram_link = models.CharField(max_length=512, verbose_name="instagram link", default="")
+    # coffees = models.ManyToManyField(Coffee)
+    # cakes = models.ManyToManyField(Cake)
+    # snacks = models.ManyToManyField(Snacks)
 
     class Meta:
         verbose_name = "Business"
@@ -27,38 +30,6 @@ class Provider(models.Model):
 
     def __str__(self):
         return self.name
-
-
-class OpenDayProvider(models.Model):
-    owner = models.ForeignKey(Provider, on_delete=models.CASCADE)
-
-    monday = models.BooleanField(default=True)
-    monday_from = models.TimeField(default=None, blank=True, null=True)
-    monday_to = models.TimeField(default=None, blank=True, null=True)
-
-    tuesday = models.BooleanField(default=True)
-    tuesday_from = models.TimeField(default=None, blank=True, null=True)
-    tuesday_to = models.TimeField(default=None, blank=True, null=True)
-
-    wednesday = models.BooleanField(default=True)
-    wednesday_from = models.TimeField(default=None, blank=True, null=True)
-    wednesday_to = models.TimeField(default=None, blank=True, null=True)
-
-    thursday = models.BooleanField(default=True)
-    thursday_from = models.TimeField(default=None, blank=True, null=True)
-    thursday_to = models.TimeField(default=None, blank=True, null=True)
-
-    friday = models.BooleanField(default=True)
-    friday_from = models.TimeField(default=None, blank=True, null=True)
-    friday_to = models.TimeField(default=None, blank=True, null=True)
-
-    saturday = models.BooleanField(default=True)
-    saturday_from = models.TimeField(default=None, blank=True, null=True)
-    saturday_to = models.TimeField(default=None, blank=True, null=True)
-
-    sunday = models.BooleanField(default=True)
-    sunday_from = models.TimeField(default=None, blank=True, null=True)
-    sunday_to = models.TimeField(default=None, blank=True, null=True)
 
 
 class Product(models.Model):
@@ -95,6 +66,38 @@ class Snacks(Product):
 
     def __str__(self):
         return self.name
+
+
+class OpenDayProvider(models.Model):
+    owner = models.ForeignKey(Provider, on_delete=models.CASCADE)
+
+    monday = models.BooleanField(default=True)
+    monday_from = models.TimeField(default=None, blank=True, null=True)
+    monday_to = models.TimeField(default=None, blank=True, null=True)
+
+    tuesday = models.BooleanField(default=True)
+    tuesday_from = models.TimeField(default=None, blank=True, null=True)
+    tuesday_to = models.TimeField(default=None, blank=True, null=True)
+
+    wednesday = models.BooleanField(default=True)
+    wednesday_from = models.TimeField(default=None, blank=True, null=True)
+    wednesday_to = models.TimeField(default=None, blank=True, null=True)
+
+    thursday = models.BooleanField(default=True)
+    thursday_from = models.TimeField(default=None, blank=True, null=True)
+    thursday_to = models.TimeField(default=None, blank=True, null=True)
+
+    friday = models.BooleanField(default=True)
+    friday_from = models.TimeField(default=None, blank=True, null=True)
+    friday_to = models.TimeField(default=None, blank=True, null=True)
+
+    saturday = models.BooleanField(default=True)
+    saturday_from = models.TimeField(default=None, blank=True, null=True)
+    saturday_to = models.TimeField(default=None, blank=True, null=True)
+
+    sunday = models.BooleanField(default=True)
+    sunday_from = models.TimeField(default=None, blank=True, null=True)
+    sunday_to = models.TimeField(default=None, blank=True, null=True)
 
 
 class Place(models.Model):

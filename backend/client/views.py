@@ -3,16 +3,15 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from biz.models import Provider
-from biz.serializers import ProviderSerializer, ProviderForClientSerializer
+from biz.models import Provider, Product, Place, Order
+from biz.serializers import ProviderSerializer, ProviderForClientSerializer, ProvidersForClientSerializer, \
+    ProductSerializer, PlaceSerializer, OrderSerializer
 from client.models import Client
 from client.serializers import ClientSerializer
 
 
 class ClientRegisterView(APIView):
     def post(self, request, id):
-        print(request.data)
-        print("test")
         context = {}
         try:
             if request.method == "POST":
@@ -35,8 +34,27 @@ class ClientViewSet(viewsets.ModelViewSet):
 
 class ProvidersForMe(APIView):
     def get(self, request, id):
-        print(request.data)
-        print("test")
         providers = Provider.objects.all()
-        serializer = ProviderForClientSerializer(providers, many=True)
+        serializer = ProvidersForClientSerializer(providers, many=True)
+        return Response(serializer.data)
+
+
+class ProviderForMe(APIView):
+    def get(self, request, client, provider):
+        product = Product.objects.filter(owner__id=provider)
+        serializer = ProductSerializer(product, many=True)
+        return Response(serializer.data)
+
+
+class SpotsForMe(APIView):
+    def get(self, request, client, provider):
+        table = Place.objects.filter(owner__id=provider)
+        serializer = PlaceSerializer(table, many=True)
+        return Response(serializer.data)
+
+
+class OrderHistoryClient(APIView):
+    def get(self, request, client):
+        history = Order.objects.filter(owner=client)
+        serializer = OrderSerializer(history, many=True)
         return Response(serializer.data)

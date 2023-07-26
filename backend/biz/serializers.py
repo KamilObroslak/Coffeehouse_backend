@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from rest_framework import serializers
+from rest_framework import serializers, request
 from .models import Coffee, Cake, Order, Place, Provider, OpenDayProvider,\
     Product, Snacks, OrderCoffee, OrderCake, OrderSnacks, OrderHistory
 
@@ -26,13 +26,6 @@ class ProviderSerializer(serializers.HyperlinkedModelSerializer):
         return obj.owner.username
 
 
-class ProviderForClientSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Provider
-        fields = ["id", "name", "city", "postcode", "street",
-                  "kind", "description", "facebook_link", "instagram_link"]
-
-
 class OpenDayProviderSerializer(serializers.HyperlinkedModelSerializer):
     owner = serializers.SerializerMethodField()
 
@@ -51,7 +44,7 @@ class OpenDayProviderSerializer(serializers.HyperlinkedModelSerializer):
         return obj.owner.name
 
 
-class ProductSerializer(serializers.HyperlinkedModelSerializer):
+class ProductSerializer(serializers.ModelSerializer):
     owner = serializers.HyperlinkedModelSerializer
 
     class Meta:
@@ -99,7 +92,7 @@ class SnacksSerializer(serializers.HyperlinkedModelSerializer):
         return obj.owner.name
 
 
-class PlaceSerializer(serializers.HyperlinkedModelSerializer):
+class PlaceSerializer(serializers.ModelSerializer):
     owner = serializers.HyperlinkedModelSerializer
 
     class Meta:
@@ -170,3 +163,22 @@ class OrderHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderHistory
         fields = ["order_id", "time_of_change", "status"]
+
+
+class ProvidersForClientSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Provider
+        fields = ["id", "name", "city", "postcode", "street",
+                  "kind", "description", "facebook_link", "instagram_link"]
+
+
+class ProviderForClientSerializer(serializers.ModelSerializer):
+    coffees = CoffeeSerializer()
+    cakes = CakeSerializer()
+    snacks = SnacksSerializer()
+
+    class Meta:
+        model = Provider
+        fields = ["id", "name", "city", "postcode", "street", "kind",
+                  "description", "facebook_link", "instagram_link",
+                  "coffees", "cakes", "snacks"]
