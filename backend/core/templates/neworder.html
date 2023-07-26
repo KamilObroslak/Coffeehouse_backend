@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Witaj nowy użytkowniku!</title>
+    <title>Nowy zamówienie</title>
     <style>
         body {
             color: white;
@@ -19,12 +19,8 @@
     </style>
 </head>
 <body>
-    {% block NewUserMessage %}
     <h1 style="font-size: 48px;">Cześć!</h1>
-    <p>Właśnie zostałeś zarejestrowany i możesz się zalogować!</p>
+    <p>Właśnie ktoś złożył zamówienie. Sprawdź!</p>
     <p class="footer">Wiadomość wygenerowana automatycznie, proszę na nią nie odpowiadać!</p>
-    <p class="footer">Jeśli chcesz usunąć swoje konto, kliknij w ten link:
-        <a href="http://127.0.0.1:8000/core/userdelete/{{hash}}">kliknij tutaj</a> </p>
-    {% endblock NewUserMessage %}
 </body>
 </html>

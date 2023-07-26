@@ -9,7 +9,7 @@ from biz.views import BusinessRegisterView, UpdateHours, AddCoffeeView, AddCakeV
 from client.views import ClientRegisterView, ClientViewSet, ProvidersForMe, ProviderForMe, SpotsForMe, \
     OrderHistoryClient
 from .views import UserRegisterView, UserLoginView, \
-    UserLogoutView, UserDeleteView
+    UserLogoutView, userdelete
 
 router = routers.DefaultRouter()
 router.register(r"clients", ClientViewSet)
@@ -32,10 +32,10 @@ urlpatterns = [
     # path("user_register/staff/", StaffRegisterView.as_view()),
 
     # Core part
-    path("user_register", UserRegisterView.as_view()),  # OK
+    path("user_register", UserRegisterView.as_view()),  # OK @ OK
     path("login/", UserLoginView.as_view()),  # OK
     path("logout/", UserLogoutView.as_view()),  # OK
-    path("<id>/userdelete/", UserDeleteView.as_view()),  # OK
+    path("userdelete/<token>", userdelete),  # OK @ OK
 
     # Client part
     path("user_register/<id>/client/", ClientRegisterView.as_view()),  # OK ?
@@ -43,8 +43,7 @@ urlpatterns = [
     path("client/<id>/places/", ProvidersForMe.as_view()),  # OK
     path("client/<client>/businesses/<provider>/", ProviderForMe.as_view()),  # OK
     path("client/<client>/businesses/<provider>/spots/", SpotsForMe.as_view()),  # OK
-    path("client/<client>/businesses/<provider>/spots/<spot>", NewOrderView.as_view()),  # OK
-    path("client/<client>/businesses/<provider>/spots/<spot>", NewOrderView.as_view()),  # OK
+    path("client/<client>/businesses/<provider>/spots/<spot>", NewOrderView.as_view()),  # OK @ OK
     path("client/<client>/history/", OrderHistoryClient.as_view()),
 
     # Business part

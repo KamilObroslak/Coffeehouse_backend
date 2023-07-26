@@ -17,12 +17,12 @@ class Message:
         return self.template.render(**kwargs)
 
 
-# class NewArticleMessage(Message):
-#     TEMPLATE_FILE = "articles/templates/newarticle.html"
+class NewOrderMessage(Message):
+    TEMPLATE_FILE = "core/templates/neworder.html"
 
 
 class NewUserMessage(Message):
-    TEMPLATE_FILE = "articles/templates/newuser.html"
+    TEMPLATE_FILE = "core/templates/newuser.html"
 
 #
 # class NewSubMessage(Message):
@@ -53,8 +53,8 @@ class SendEmail:
         sender = "kamilobroslak1@gmail.com"
         recipient = str(recipient)  # mail do testów formy maila i czy maile wychodza
         print(recipient)
-        password = ""  # przy wpisaniu hasła do konta google maile wychodzą i nie pojawia się błąd
-        subject = "Test wysłania wiadomości do wielu użytkowników"
+        password = "disbxlwfqyjhefvd"  # przy wpisaniu hasła do konta google maile wychodzą i nie pojawia się błąd
+        subject = "Cześć! Cieszymy się że jesteś z nami :)"
 
         hash = token.token
 
@@ -77,96 +77,35 @@ class SendEmail:
             serwer.sendmail(sender, recipient, text)
 
 
-# class SendArticleEmail:
-#
-#     def send_email(self, recipients):
-#
-#         for i in recipients:
-#             port = 465  # port używany przez protokół ssl
-#             smtp_serwer = "smtp.gmail.com"
-#             sender = "kamilobroslak1@gmail.com"
-#             recipient = str(i)  # mail do testów formy maila i czy maile wychodza
-#             password = ""  # przy wpisaniu hasła do konta google maile wychodzą i nie pojawia się błąd
-#             subject = "Właśnie pojawił się nowy artykuł!"
-#
-#             newarticle = NewArticleMessage()
-#             content = newarticle.render()
-#
-#             message = MIMEMultipart()
-#             message["From"] = sender
-#             message["To"] = recipient
-#             message["Subject"] = subject
-#
-#             message.attach(MIMEText(content, "html"))
-#
-#             text = message.as_string()
-#
-#             ssl_pol = ssl.create_default_context()
-#
-#             with smtplib.SMTP_SSL(smtp_serwer, port, context=ssl_pol) as serwer:
-#                 serwer.login(sender, password)
-#                 serwer.sendmail(sender, recipient, text)
+class SendOrderEmail:
 
-#
-# class NewCommentEmail:
-#
-#     def send_email(self):
-#
-#         port = 465  # port używany przez protokół ssl
-#         smtp_serwer = "smtp.gmail.com"
-#         sender = "kamilobroslak1@gmail.com"
-#         recipient = "kamil.obroslak@embiq.com"  # mail do testów formy maila i czy maile wychodza
-#         password = ""  # przy wpisaniu hasła do konta google maile wychodzą i nie pojawia się błąd
-#         subject = "Dodano nowy komentarz!"
-#
-#         new_comment = NewCommentMessage()
-#         content = new_comment.render()
-#
-#         message = MIMEMultipart()
-#         message["From"] = sender
-#         message["To"] = recipient
-#         message["Subject"] = subject
-#
-#         message.attach(MIMEText(content, "html"))
-#
-#         text = message.as_string()
-#
-#         ssl_pol = ssl.create_default_context()
-#
-#         with smtplib.SMTP_SSL(smtp_serwer, port, context=ssl_pol) as serwer:
-#             serwer.login(sender, password)
-#             serwer.sendmail(sender, recipient, text)
-#
-#
-# class SendSubEmail:
-#     def send_email(self, recipient, token):
-#
-#         port = 465  # port używany przez protokół ssl
-#         smtp_serwer = "smtp.gmail.com"
-#         sender = "kamilobroslak1@gmail.com"
-#         password = ""  # przy wpisaniu hasła do konta google maile wychodzą i nie pojawia się błąd
-#         subject = "Zostałeś subskrybentem!"
-#
-#         hash = token.token
-#
-#         newsub = NewSubMessage()
-#         content = newsub.render(hash=hash)
-#
-#         message = MIMEMultipart()
-#         message["From"] = sender
-#         message["To"] = recipient
-#         message["Subject"] = subject
-#
-#         message.attach(MIMEText(content, "html"))
-#
-#         text = message.as_string()
-#
-#         ssl_pol = ssl.create_default_context()
-#
-#         with smtplib.SMTP_SSL(smtp_serwer, port, context=ssl_pol) as serwer:
-#             serwer.login(sender, password)
-#             serwer.sendmail(sender, recipient, text)
-#
+    def send_email(self, recipient):
+
+        port = 465  # port używany przez protokół ssl
+        smtp_serwer = "smtp.gmail.com"
+        sender = "kamilobroslak1@gmail.com"
+        recipient = str(recipient)  # mail do testów formy maila i czy maile wychodza
+        password = "disbxlwfqyjhefvd"  # przy wpisaniu hasła do konta google maile wychodzą i nie pojawia się błąd
+        subject = "Właśnie ktoś zlożył zamówienie! :)"
+
+        neworder = NewOrderMessage()
+        content = neworder.render()
+
+        message = MIMEMultipart()
+        message["From"] = sender
+        message["To"] = recipient
+        message["Subject"] = subject
+
+        message.attach(MIMEText(content, "html"))
+
+        text = message.as_string()
+
+        ssl_pol = ssl.create_default_context()
+
+        with smtplib.SMTP_SSL(smtp_serwer, port, context=ssl_pol) as serwer:
+            serwer.login(sender, password)
+            serwer.sendmail(sender, recipient, text)
+
 
 class EmailToAdminDelete:
     def send_email(self):

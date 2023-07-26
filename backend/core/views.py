@@ -3,12 +3,14 @@ import datetime
 import jwt as jwt
 from django.contrib import auth
 from django.contrib.auth.models import Group, User
+from django.shortcuts import render
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from biz.models import Provider, Product
 from biz.serializers import ProviderSerializer, CoffeeSerializer
+from .messages import SendEmail
 from .models import UserToken
 from rest_framework import status
 
@@ -46,6 +48,8 @@ class UserRegisterView(APIView):
                     token = UserToken(owner=user)
                     token.save()
                     auth.login(request, user)
+                    send_email_instance = SendEmail()
+                    send_email_instance.send_email(recipient=user.email, token=token)
                     return Response({"message": "User created successfully"})
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
@@ -109,15 +113,15 @@ class UserLogoutView(APIView):
         return response
 
 
-class UserDeleteView(APIView):
-    def delete(self, request, id, *args, **kwargs):
-        email = request.data.get("email")
-        token = request.data.get("token")
-        instance = User.objects.filter(id=id, email=email)
-        check = UserToken.objects.get(token=token)
-        if check:
-            if instance:
-                instance.delete()
-                return Response({"message": "Object destroyed successfully"})
-            else:
-                return Response({"message": "Object not found"}, status=status.HTTP_404_NOT_FOUND)
+def userdelete(request, token):
+    try:
+        score = UserToken.objects.get(token=token)
+    except UserToken.DoesNotExist:
+        return render(request, "user_not_found.html")
+
+    user = User.objects.get(username=score.owner)
+    print(user)
+    user.delete()
+    score.delete()
+
+    return render(request, "user_deleted.html")

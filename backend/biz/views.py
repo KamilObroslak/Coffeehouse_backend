@@ -2,6 +2,7 @@ from datetime import datetime
 
 from biz.models import Provider, OpenDayProvider, Product
 from client.models import Client
+from core.messages import SendEmail, SendOrderEmail
 from core.models import UserToken
 
 import jwt as jwt
@@ -209,11 +210,6 @@ class PlaceViewSet(viewsets.ModelViewSet):
     serializer_class = PlaceSerializer
 
 
-# class OrderStatusViewSet(viewsets.ModelViewSet):
-#     queryset = OrderStatus.objects.all()
-#     serializer_class = OrderStatusSerializer
-
-
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
@@ -385,6 +381,9 @@ class NewOrderView(APIView):
         order.total_price = total_price_order
         order.status = 1
         order.save()
+        recipient = User.objects.get(username=provider.owner)
+        send_email_instance = SendOrderEmail()
+        send_email_instance.send_email(recipient=recipient.email)
 
         return Response({"message": "Order created successfully"})
 
