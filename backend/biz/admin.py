@@ -1,6 +1,5 @@
 from django.contrib import admin
-from django.urls import reverse
-from django.utils.html import format_html
+from import_export.admin import ImportExportModelAdmin
 
 from .models import Provider, OpenDayProvider, Coffee, Cake, Snacks, Place, Order, OrderHistory, OrderCoffee, OrderCake, \
     OrderSnacks, Product
@@ -10,16 +9,16 @@ class OpenDayProviderInLine(admin.StackedInline):
     model = OpenDayProvider
     autocomplete_fields = []
     extra = 0
-    fields = [('monday', 'monday_from', 'monday_to'),
+    fields = (('monday', 'monday_from', 'monday_to'),
               ('tuesday', 'tuesday_from', 'tuesday_to'),
               ('wednesday', 'wednesday_from', 'wednesday_to'),
               ('thursday', 'thursday_from', 'thursday_to'),
               ('friday', 'friday_from', 'friday_to'),
               ('saturday', 'saturday_from', 'saturday_to'),
-              ('sunday', 'sunday_from', 'sunday_to')]
+              ('sunday', 'sunday_from', 'sunday_to'))
 
 
-class OpenDayProviderAdmin(admin.ModelAdmin):
+class OpenDayProviderAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ["id", "owner"]
     list_filter = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
     search_fields = ["id", "owner__username", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday",
@@ -27,21 +26,21 @@ class OpenDayProviderAdmin(admin.ModelAdmin):
     readonly_fields = ["owner", "id"]
 
 
-class CoffeeAdmin(admin.ModelAdmin):
+class CoffeeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ["id", "name", "owner", "price", "description", "gluten", "active"]
     list_filter = ["name", "gluten"]
     search_fields = ["id", "name", "price", "description", "gluten"]
     readonly_fields = ["id", "owner"]
 
 
-class CakeAdmin(admin.ModelAdmin):
+class CakeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ["id", "name", "price", "description", "gluten"]
     list_filter = ["name", "gluten"]
     search_fields = ["id", "name", "price", "description", "gluten"]
     readonly_fields = ["id", "owner"]
 
 
-class SnacksAdmin(admin.ModelAdmin):
+class SnacksAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ["id", "name", "price", "description", "gluten"]
     list_filter = ["name", "gluten"]
     search_fields = ["id", "name", "price", "description", "gluten"]
@@ -54,7 +53,7 @@ class PlaceInLine(admin.TabularInline):
     extra = 0
 
 
-class PlaceAdmin(admin.ModelAdmin):
+class PlaceAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ["id", "owner", "spot_amount", "name", "availability"]
     list_filter = ["owner", "spot_amount", "name", "availability"]
     search_fields = ["id", "owner", "spot_amount", "name", "availability"]
@@ -67,7 +66,7 @@ class OrderCoffeeInLine(admin.TabularInline):
     extra = 0
 
 
-class OrderCoffeeAdmin(admin.ModelAdmin):
+class OrderCoffeeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ["id", "order", "coffee", "quantity"]
     list_filter = ["coffee", "quantity"]
     search_fields = ["order__id", "coffee__name", "quantity"]
@@ -80,7 +79,7 @@ class OrderCakeInLine(admin.TabularInline):
     extra = 0
 
 
-class OrderCakeAdmin(admin.ModelAdmin):
+class OrderCakeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ["id", "order", "cake", "quantity"]
     list_filter = ["cake", "quantity"]
     search_fields = ["order__id", "cake__name", "quantity"]
@@ -93,7 +92,7 @@ class OrderSnacksInLine(admin.TabularInline):
     extra = 0
 
 
-class OrderSnacksAdmin(admin.ModelAdmin):
+class OrderSnacksAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ["id", "order", "snacks", "quantity"]
     list_filter = ["snacks", "quantity"]
     search_fields = ["order__id", "snacks__name", "quantity"]
@@ -107,11 +106,11 @@ class OrderHistoryInLine(admin.TabularInline):
     readonly_fields = ["order_id", "time_of_change", "status"]
 
 
-class OrderHistoryAdmin(admin.ModelAdmin):
+class OrderHistoryAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ["id", "order_id", "time_of_change", "status"]
     list_filter = ["time_of_change", "status"]
     search_fields = ["order_id__id"]
-    readonly_fields = ["order_id", "time_of_change"]
+    readonly_fields = ["order_id", "time_of_change", "status"]
 
 
 class OrderInLine(admin.TabularInline):
@@ -122,12 +121,13 @@ class OrderInLine(admin.TabularInline):
                        "order_datatime", "provider"]
 
 
-class OrderAdmin(admin.ModelAdmin):
+class OrderAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ["id", "owner", "total_price", "takeaway_order", "spot", "status", "order_datatime"]
     list_filter = ["spot", "takeaway_order", "status", "order_datatime"]
     search_fields = ["id", "provider__name", "total_price", "takeaway_order", "status", "spot__name"]
     inlines = [OrderCoffeeInLine, OrderCakeInLine, OrderSnacksInLine, OrderHistoryInLine]
-    readonly_fields = ["id", "owner", "provider"]
+    readonly_fields = ["id", "owner", "provider", "spot", "total_price", "status", "takeaway_order", "order_datatime"]
+    fields = (("id", "owner", "provider", "total_price"), "spot", "status", "takeaway_order", "order_datatime")
 
 
 class ProductInLine(admin.TabularInline):
@@ -136,19 +136,40 @@ class ProductInLine(admin.TabularInline):
     extra = 0
 
 
-class ProductAdmin(admin.ModelAdmin):
+class ProductAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ["id", "name", "price", "description", "gluten", "owner", "active"]
     list_filter = ["gluten", "active"]
     search_fields = ["id", "name", "price", "gluten", "owner__username", "active"]
     readonly_fields = ["id", "owner"]
 
 
-class ProviderAdmin(admin.ModelAdmin):
+class ProviderAdmin(ImportExportModelAdmin ,admin.ModelAdmin):
     list_display = ["id", "name", "owner", "kind", "city", "postcode", "street"]
     list_filter = ["kind", "city", "postcode"]
     search_fields = ["id", "name", "owner__username", "kind", "city", "postcode", "street"]
-    readonly_fields = ["owner"]
+    readonly_fields = ["owner", "kind"]
     inlines = [ProductInLine, PlaceInLine, OpenDayProviderInLine]
+    actions = ["reminder"]
+    fields = (("owner", "name", "kind"), ("city", "postcode", "street"),
+              ("description", "facebook_link", "instagram_link"))
+
+    def reminder(self, request, queryset):
+        for provider in queryset:
+            provider.reminder()
+        self.message_user(request, "Send")
+
+        # Definiujemy metodę obsługującą akcję
+
+    def action(self, request, queryset):
+        print("test")
+
+    action.short_description = "Opcja nr 2"  # Tekst wyświetlany na przycisku akcji
+
+    # Dodaj akcję do listy dostępnych akcji
+    actions = ["action"]
+
+    reminder.short_description = "Wyślij przypomnienie"
+
 
 
 admin.site.register(Provider, ProviderAdmin)

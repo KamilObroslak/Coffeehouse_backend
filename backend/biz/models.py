@@ -16,13 +16,10 @@ class Provider(models.Model):
     postcode = models.CharField(max_length=256, verbose_name=_("postcode"))
     street = models.CharField(max_length=256, verbose_name=_("street"))
     kind = models.IntegerField(choices=KindProvider.choices, verbose_name=_("kind"), default=1)
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="owner")
-    description = models.CharField(max_length=2048, verbose_name="description", default="")
-    facebook_link = models.CharField(max_length=512, verbose_name="facebook link", default="")
-    instagram_link = models.CharField(max_length=512, verbose_name="instagram link", default="")
-    # coffees = models.ManyToManyField(Coffee)
-    # cakes = models.ManyToManyField(Cake)
-    # snacks = models.ManyToManyField(Snacks)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="owner", blank=True)
+    description = models.CharField(max_length=2048, verbose_name="description", blank=True)
+    facebook_link = models.CharField(max_length=512, verbose_name="facebook link", blank=True)
+    instagram_link = models.CharField(max_length=512, verbose_name="instagram link", blank=True)
 
     class Meta:
         verbose_name = "Business"
@@ -30,6 +27,10 @@ class Provider(models.Model):
 
     def __str__(self):
         return self.name
+    #
+    # def reminder(self):
+    #     # kod
+    #     pass
 
 
 class Product(models.Model):
@@ -37,7 +38,7 @@ class Product(models.Model):
     price = models.FloatField()
     description = models.CharField(max_length=1024, default="", verbose_name="Description", blank=True)
     gluten = models.BooleanField(default=False)
-    owner = models.ForeignKey(Provider, on_delete=models.CASCADE, verbose_name="owner")
+    owner = models.ForeignKey(Provider, on_delete=models.CASCADE, verbose_name="owner", blank=True)
     active = models.BooleanField(default=True)
 
 
@@ -69,7 +70,7 @@ class Snacks(Product):
 
 
 class OpenDayProvider(models.Model):
-    owner = models.ForeignKey(Provider, on_delete=models.CASCADE)
+    owner = models.ForeignKey(Provider, on_delete=models.CASCADE, default="", blank=True)
 
     monday = models.BooleanField(default=True)
     monday_from = models.TimeField(default=None, blank=True, null=True)
@@ -99,12 +100,19 @@ class OpenDayProvider(models.Model):
     sunday_from = models.TimeField(default=None, blank=True, null=True)
     sunday_to = models.TimeField(default=None, blank=True, null=True)
 
+    class Meta:
+        verbose_name = "Opening day"
+        verbose_name_plural = "Opening days"
+
+    def __str__(self):
+        return str(self.owner.name)
+
 
 class Place(models.Model):
     spot_amount = models.IntegerField()
     name = models.CharField(max_length=256, default="Table", verbose_name="Table")
     availability = models.BooleanField(default=True)
-    owner = models.ForeignKey(Provider, on_delete=models.CASCADE, verbose_name="owner")
+    owner = models.ForeignKey(Provider, on_delete=models.CASCADE, verbose_name="owner", blank=True, default="")
 
     class Meta:
         verbose_name = "Table"
@@ -121,16 +129,16 @@ class OrderStatus(models.IntegerChoices):
 
 
 class Order(models.Model):
-    spot = models.ForeignKey(Place, on_delete=models.CASCADE, verbose_name="spot")
+    spot = models.ForeignKey(Place, on_delete=models.CASCADE, verbose_name="spot", blank=True)
     total_price = models.FloatField(verbose_name="total price")
     coffees = models.ManyToManyField(Coffee, through='OrderCoffee', verbose_name="coffees")
     cakes = models.ManyToManyField(Cake, through='OrderCake', verbose_name="cakes")
     snacks = models.ManyToManyField(Snacks, through='OrderSnacks', verbose_name="snacks")
     takeaway_order = models.BooleanField(default=False)
-    owner = models.ForeignKey(Client, on_delete=models.CASCADE, verbose_name="client")
-    status = models.IntegerField(choices=OrderStatus.choices, verbose_name=_("status"), null=True)
+    owner = models.ForeignKey(Client, on_delete=models.CASCADE, verbose_name="client", blank=True, default="")
+    status = models.IntegerField(choices=OrderStatus.choices, verbose_name=_("status"), blank=True, default=1)
     order_datatime = models.DateTimeField(verbose_name="order datatime", default=timezone.now)
-    provider = models.ForeignKey(Provider, on_delete=models.CASCADE)
+    provider = models.ForeignKey(Provider, on_delete=models.CASCADE, blank=True, default="", null=True)
 
     class Meta:
         verbose_name = "Order"
@@ -141,7 +149,7 @@ class Order(models.Model):
 
 
 class OrderCoffee(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, verbose_name="order")
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, verbose_name="order", blank=True)
     coffee = models.ForeignKey(Coffee, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
 
@@ -154,8 +162,8 @@ class OrderCoffee(models.Model):
 
 
 class OrderCake(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    cake = models.ForeignKey(Cake, on_delete=models.CASCADE)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, blank=True)
+    cake = models.ForeignKey(Cake, on_delete=models.CASCADE, blank=True)
     quantity = models.PositiveIntegerField()
 
     class Meta:
@@ -167,8 +175,8 @@ class OrderCake(models.Model):
 
 
 class OrderSnacks(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    snacks = models.ForeignKey(Snacks, on_delete=models.CASCADE)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, blank=True)
+    snacks = models.ForeignKey(Snacks, on_delete=models.CASCADE, blank=True)
     quantity = models.PositiveIntegerField()
 
     class Meta:
@@ -180,9 +188,9 @@ class OrderSnacks(models.Model):
 
 
 class OrderHistory(models.Model):
-    order_id = models.ForeignKey(Order, on_delete=models.CASCADE)
+    order_id = models.ForeignKey(Order, on_delete=models.CASCADE, blank=True)
     time_of_change = models.DateTimeField(null=True, blank=True)
-    status = models.IntegerField(choices=OrderStatus.choices, verbose_name=_("status"), null=True)
+    status = models.IntegerField(choices=OrderStatus.choices, verbose_name=_("status"), null=True, blank=True)
 
     class Meta:
         verbose_name = "Order history"
@@ -190,3 +198,16 @@ class OrderHistory(models.Model):
 
     def __str__(self):
         return str(self.order_id)
+
+#
+# class Reminder(models.Model):
+#     provider = models.ForeignKey(Provider, on_delete=models.CASCADE)
+#     reminder_date = models.DateTimeField(default=timezone.now())
+#     sent = models.BooleanField(default=True)
+#
+#     class Meta:
+#         verbose_name = "Reminder"
+#         verbose_name_plural = "Reminders"
+#
+#     def __str__(self):
+#         return str(self.provider)

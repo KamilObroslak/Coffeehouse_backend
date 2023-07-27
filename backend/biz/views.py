@@ -589,7 +589,7 @@ class AddPlaceView(APIView):
                                      availability=availability,
                                      owner=owner)
         place.save()
-        return Response({"message": "Snack has been saved"})
+        return Response({"message": "Place has been saved"})
 
 
 class EditPlaceView(APIView):
