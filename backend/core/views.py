@@ -27,6 +27,10 @@ def create_limited_permissions_group():
 
 
 class UserRegisterView(APIView):
+
+    # def get(self, request):
+    #     return render(request, 'index.html')
+
     def post(self, request):
         print(request.data)
         print("test")
@@ -125,3 +129,7 @@ def userdelete(request, token):
     score.delete()
 
     return render(request, "user_deleted.html")
+
+
+def index(request):
+    return render(request, 'index.html')

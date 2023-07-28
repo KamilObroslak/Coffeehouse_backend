@@ -113,7 +113,7 @@ class EmailToAdminDelete:
         smtp_serwer = "smtp.gmail.com"
         sender = "kamilobroslak1@gmail.com"
         recipient = "kamil.obroslak@embiq.com"  # mail do testów formy maila i czy maile wychodza
-        password = ""  # przy wpisaniu hasła do konta google maile wychodzą i nie pojawia się błąd
+        password = "disbxlwfqyjhefvd"  # przy wpisaniu hasła do konta google maile wychodzą i nie pojawia się błąd
         subject = "Użytkownik usunął konto!"
 
         user_del = DeleteUserMessageAdmin()
