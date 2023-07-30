@@ -30,7 +30,7 @@
     <script>
         // Funkcja pobierająca dane z endpointu DRF i wyświetlająca je na stronie
         function getDataFromBackend() {
-            fetch('http://127.0.0.1:8000/core/')
+            fetch('http://16.170.149.212:8000/core/')
                 .then(response => response.json())
                 .then(data => {
                     // Tutaj możesz przetworzyć dane, np. wyświetlić je na stronie
@@ -59,7 +59,7 @@
 
             formData.append("csrfmiddlewaretoken", "{{ csrf_token }}");
 
-            fetch('http://127.0.0.1:8000/core/user_register', {
+            fetch('http://16.170.149.212:8000/core/user_register', {
                 method: 'POST',
                 body: formData,
                 headers: {
