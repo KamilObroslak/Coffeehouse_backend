@@ -1,8 +1,15 @@
 from datetime import datetime
 
+from django.core.exceptions import ObjectDoesNotExist
+from django.shortcuts import render
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import never_cache
+from rest_framework.authentication import SessionAuthentication
+from rest_framework.permissions import IsAuthenticated
+
 from biz.models import Provider, OpenDayProvider, Product
 from client.models import Client
-from core.messages import SendEmail, SendOrderEmail
+from core.messages import SendOrderEmail
 from core.models import UserToken
 
 import jwt as jwt
@@ -17,8 +24,8 @@ from .models import Coffee, Cake, Place, Order, OrderCoffee, \
 from rest_framework import viewsets, status
 
 from .serializers import CoffeeSerializer, CakeSerializer, OpenDayProviderSerializer, \
-    ProductSerializer, ProviderSerializer, SnacksSerializer, PlaceSerializer,\
-    OrderSerializer, OrderCoffeeSerializer, OrderCakeSerializer,\
+    ProductSerializer, ProviderSerializer, SnacksSerializer, PlaceSerializer, \
+    OrderSerializer, OrderCoffeeSerializer, OrderCakeSerializer, \
     OrderSnackSerializer, OrderHistorySerializer
 
 
@@ -34,22 +41,30 @@ def create_limited_permissions_group():
 
 
 class BusinessRegisterView(APIView):
+
+    def get(self, request, id):
+        return render(request, 'business_register.html')
+
     def post(self, request, id):
         print(request.data)
         print("test")
         context = {}
         if request.method == "POST":
             user = User.objects.get(id=id)
-            provider = Provider.objects.create(name=request.data["business_name"],
-                                               city=request.data["business_city"],
-                                               postcode=request.data["business_postcode"],
-                                               street=request.data["business_street"],
-                                               kind=request.data["business_kind"],
-                                               owner=user,
-                                               description=request.data["business_description"],
-                                               facebook_link=request.data["business_facebook_link"],
-                                               instagram_link=request.data["business_instagram_link"])
-            provider.save()
+            try:
+                check = Provider.objects.get(owner=user)
+                return Response({"message": "User already exists"})
+            except Provider.DoesNotExist:
+                provider = Provider.objects.create(name=request.data["business_name"],
+                                                   city=request.data["business_city"],
+                                                   postcode=request.data["business_postcode"],
+                                                   street=request.data["business_street"],
+                                                   kind=request.data["business_kind"],
+                                                   owner=user,
+                                                   description=request.data["business_description"],
+                                                   facebook_link=request.data["business_facebook_link"],
+                                                   instagram_link=request.data["business_instagram_link"])
+                provider.save()
 
             return Response({"message": "User created successfully"})
         return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -338,44 +353,56 @@ class NewOrderView(APIView):
             provider=provider
         )
 
+        # Coffees
         coffees = customer_order["coffees"]
         for coffee_data in coffees:
             coffee_name = coffee_data["name"]
             coffee_quantity = coffee_data["quantity"]
-            coffee = Coffee.objects.get(name=coffee_name, owner=provider)
-            price_for_coffees += coffee_quantity * coffee.price
-            print(price_for_coffees)
-            OrderCoffee.objects.create(
-                order=order,
-                coffee=coffee,
-                quantity=coffee_quantity
-            )
+            try:
+                coffee = Coffee.objects.get(name=coffee_name, owner=provider)
+                price_for_coffees += coffee_quantity * coffee.price
+                OrderCoffee.objects.create(
+                    order=order,
+                    coffee=coffee,
+                    quantity=coffee_quantity
+                )
+            except ObjectDoesNotExist:
+                # Przedmiot nie istnieje, więc pomijamy go
+                pass
 
+        # Cakes
         cakes = customer_order["cakes"]
         for cake_data in cakes:
             cake_name = cake_data["name"]
             cake_quantity = cake_data["quantity"]
-            cake = Cake.objects.get(name=cake_name, owner=provider)
-            price_for_cakes += cake_quantity * cake.price
-            print(price_for_cakes)
-            OrderCake.objects.create(
-                order=order,
-                cake=cake,
-                quantity=cake_quantity
-            )
+            try:
+                cake = Cake.objects.get(name=cake_name, owner=provider)
+                price_for_cakes += cake_quantity * cake.price
+                OrderCake.objects.create(
+                    order=order,
+                    cake=cake,
+                    quantity=cake_quantity
+                )
+            except ObjectDoesNotExist:
+                # Przedmiot nie istnieje, więc pomijamy go
+                pass
 
+        # Snacks
         snacks = customer_order["snacks"]
         for snack_data in snacks:
             snack_name = snack_data['name']
             snack_quantity = snack_data["quantity"]
-            snack = Snacks.objects.get(name=snack_name, owner=provider)
-            price_for_snacks += snack_quantity * snack.price
-            print(price_for_snacks)
-            OrderSnacks.objects.create(
-                order=order,
-                snacks=snack,
-                quantity=snack_quantity
-            )
+            try:
+                snack = Snacks.objects.get(name=snack_name, owner=provider)
+                price_for_snacks += snack_quantity * snack.price
+                OrderSnacks.objects.create(
+                    order=order,
+                    snacks=snack,
+                    quantity=snack_quantity
+                )
+            except ObjectDoesNotExist:
+                # Przedmiot nie istnieje, więc pomijamy go
+                pass
 
         total_price_order = price_for_coffees + price_for_cakes + price_for_snacks
         order.total_price = total_price_order
@@ -409,13 +436,26 @@ class OrderUpdateView(APIView):
 
 
 class AddCoffeeView(APIView):
+
+    def get(self, request, id):
+        return render(request, 'add_coffee.html')
+
     def post(self, request, id):
         print(request.data)
         name = request.data["name"]
         price = request.data["price"]
         description = request.data["description"]
-        gluten = request.data["gluten"]
-        active = request.data["active"]
+        x = request.data.get("gluten")
+        if x == True or "on":
+            gluten = True
+        else:
+            gluten = False
+        y = request.data.get("active")
+        if y == True or "on":
+            active = True
+        else:
+            active = False
+
         owner = Provider.objects.get(id=id)
 
         coffee = Coffee.objects.create(name=name,
@@ -470,8 +510,16 @@ class AddCakeView(APIView):
         name = request.data["name"]
         price = request.data["price"]
         description = request.data["description"]
-        gluten = request.data["gluten"]
-        active = request.data["active"]
+        x = request.data.get("gluten")
+        if x == True or "on":
+            gluten = True
+        else:
+            gluten = False
+        y = request.data.get("active")
+        if y == True or "on":
+            active = True
+        else:
+            active = False
         owner = Provider.objects.get(id=id)
 
         cake = Cake.objects.create(name=name,
@@ -546,8 +594,16 @@ class EditSnackView(APIView):
         name = request.data["name"]
         price = request.data["price"]
         description = request.data["description"]
-        gluten = request.data["gluten"]
-        active = request.data["active"]
+        x = request.data.get("gluten")
+        if x == True or "on":
+            gluten = True
+        else:
+            gluten = False
+        y = request.data.get("active")
+        if y == True or "on":
+            active = True
+        else:
+            active = False
 
         x = Snacks.objects.get(id=snack)
 
@@ -624,3 +680,28 @@ class DeletePlaceView(APIView):
             else:
                 return Response({"message": "Object not found"}, status=status.HTTP_404_NOT_FOUND)
         return Response({"message": "Object not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+class ProviderView(APIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @method_decorator(never_cache)
+    def get(self, request, id):
+        business_data = request.session.get("id")
+        print(business_data)
+        user_id = id
+        print(user_id)
+        business_id = business_data["business"][0]["id"]
+        print(business_id)
+        return render(request, 'provider.html', {
+            "user_id": business_id,
+            "business_data": business_data
+        })
+
+
+class ProviderOrders(APIView):
+    def get(self, request, id):
+        orders = Order.objects.filter(provider=id)
+        serializer = OrderSerializer(orders, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

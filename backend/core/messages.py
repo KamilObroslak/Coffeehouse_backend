@@ -24,21 +24,6 @@ class NewOrderMessage(Message):
 class NewUserMessage(Message):
     TEMPLATE_FILE = "core/templates/newuser.html"
 
-#
-# class NewSubMessage(Message):
-#     TEMPLATE_FILE = "articles/templates/newsub.html"
-#
-#     def render(self, hash):
-#         with open(self.TEMPLATE_FILE, "r") as file:
-#             template = Template(file.read())
-#             rendered_content = template.render(hash=hash)
-#
-#         return rendered_content
-
-#
-# class NewCommentMessage(Message):
-#     TEMPLATE_FILE = "articles/templates/newcomment.html"
-
 
 class DeleteUserMessageAdmin(Message):
     TEMPLATE_FILE = "articles/templates/userdeleteadmin.html"

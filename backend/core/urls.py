@@ -4,11 +4,11 @@ from rest_framework import routers
 from biz.views import BusinessRegisterView, UpdateHours, AddCoffeeView, AddCakeView, AddSnackView, NewOrderView, \
     OrderUpdateView, EditCoffeeView, EditCakeView, EditSnackView, DeleteCoffeeView, DeleteCakeView, DeleteSnackView, \
     AddPlaceView, EditPlaceView, DeletePlaceView, BusinessViewSet, OpenDayProviderViewSet, ProductViewSet, \
-    CoffeeViewSet, CakeViewSet, SnacksViewSet, PlaceViewSet, OrderViewSet, OrderCoffeeSet, OrderCakeSet,\
-    OrderSnackSet, OrderHistorySet
-from client.views import ClientRegisterView, ClientViewSet, ProvidersForMe, ProviderForMe, SpotsForMe, \
-    OrderHistoryClient
-from .views import UserRegisterView, UserLoginView, \
+    CoffeeViewSet, CakeViewSet, SnacksViewSet, PlaceViewSet, OrderViewSet, OrderCoffeeSet, OrderCakeSet, \
+    OrderSnackSet, OrderHistorySet, ProviderView, ProviderOrders
+from client.views import ClientRegisterView, ProvidersForMe, ProviderForMe, SpotsForMe, \
+    OrderHistoryClient, ClientLogin, ClientForMe, ClientViewSet
+from .views import UserRegisterView, ProviderLoginView, \
     UserLogoutView, userdelete, index
 
 router = routers.DefaultRouter()
@@ -33,16 +33,17 @@ urlpatterns = [
 
     # Core part
     path("", index, name="index"),  # OK @ OK
-    # path("", home, name="index"),  # OK @ OK
     path("user_register", UserRegisterView.as_view()),  # OK @ OK
-    path("login/", UserLoginView.as_view()),  # OK
+    path("provider_login/", ProviderLoginView.as_view()),  # OK
     path("logout/", UserLogoutView.as_view()),  # OK
     path("userdelete/<token>", userdelete),  # OK @ OK
 
     # Client part
     path("user_register/<id>/client/", ClientRegisterView.as_view()),  # OK ?
+    path("client/login/", ClientLogin.as_view()),
     path("client/<id>/updateorder/<order>", OrderUpdateView.as_view()),  # OK
-    path("client/<id>/places/", ProvidersForMe.as_view()),  # OK
+    path("client/<id>/", ClientForMe.as_view()),
+    path("client/<id>/businesses/", ProvidersForMe.as_view()),  # OK
     path("client/<client>/businesses/<provider>/", ProviderForMe.as_view()),  # OK
     path("client/<client>/businesses/<provider>/spots/", SpotsForMe.as_view()),  # OK
     path("client/<client>/businesses/<provider>/spots/<spot>", NewOrderView.as_view()),  # OK @ OK
@@ -50,10 +51,12 @@ urlpatterns = [
 
     # Business part
     path("user_register/<id>/biz/", BusinessRegisterView.as_view()),  # OK
-
+    path("biz/<int:id>/", ProviderView.as_view(), name="provider_view"),
     path("biz/<id>/updatehours", UpdateHours.as_view()),  # OK
 
-    path("biz/<id>/addcoffee", AddCoffeeView.as_view()),  # OK
+    path("biz/<id>/ordershistory/", ProviderOrders.as_view()),
+
+    path('biz/<id>/addcoffee', AddCoffeeView.as_view()),  # OK
     path("biz/<id>/editcoffee/<coffee>", EditCoffeeView.as_view()),  # OK
     path("biz/<id>/deletecoffee/<coffee>", DeleteCoffeeView.as_view()),  # OK !
 

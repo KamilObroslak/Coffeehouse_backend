@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Provider Details</title>
+</head>
+<body>
+    <h1>Provider Details</h1>
+
+    <p>User ID: {{ user_id }}</p>
+
+    <div>
+        <h2>Business Information</h2>
+        <!-- <p>{{ business_data|json_script }}</p> -->
+        <p>{{ business_data }}</p>
+    </div>
+
+    <!-- Przycisk wylogowania -->
+    <button id="logout-button">Wyloguj</button>
+
+    <script>
+        // Funkcja obsługująca wylogowanie
+        function handleLogout() {
+            fetch('http://127.0.0.1:8000/core/logout/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Wylogowano:', data);
+                // Przekierowanie na stronę logowania po wylogowaniu
+                window.location.href = 'http://127.0.0.1:8000/core/provider_login/';
+            })
+            .catch(error => {
+                console.error('Wystąpił błąd podczas wylogowywania:', error);
+                // Możesz dodać tu odpowiedni komunikat dla użytkownika o błędzie wylogowania
+            });
+        }
+
+        // Nasłuchuj na kliknięcie przycisku wylogowania i wykonaj funkcję handleLogout
+        const logoutButton = document.getElementById('logout-button');
+        logoutButton.addEventListener('click', handleLogout);
+    </script>
+</body>
+</html>

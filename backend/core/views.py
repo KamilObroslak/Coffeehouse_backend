@@ -3,7 +3,10 @@ import datetime
 import jwt as jwt
 from django.contrib import auth
 from django.contrib.auth.models import Group, User
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import never_cache
+
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -27,9 +30,6 @@ def create_limited_permissions_group():
 
 
 class UserRegisterView(APIView):
-
-    # def get(self, request):
-    #     return render(request, 'index.html')
 
     def post(self, request):
         print(request.data)
@@ -58,9 +58,13 @@ class UserRegisterView(APIView):
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
-class UserLoginView(APIView):
+class ProviderLoginView(APIView):
+
+    @method_decorator(never_cache)
+    def get(self, request):
+        return render(request, 'login_and_register.html')
+
     def post(self, request):
-        print(request.data)
         username = request.data.get("username")
         password = request.data.get("password")
         context = {}
@@ -85,34 +89,34 @@ class UserLoginView(APIView):
 
         token = jwt.encode(payload, "secret", algorithm="HS256")
 
-        provider = User.objects.get(id=user.id)
+        owner = User.objects.get(id=user.id)
+        provider = Provider.objects.get(owner=owner)
         business = None
         product = None
 
         try:
-            business = Provider.objects.filter(owner=provider.id)
+            business = Provider.objects.filter(owner=owner.id)
             for i in business:
                 product = Product.objects.filter(owner=i)
         except Provider.DoesNotExist:
             pass
 
-        response = Response({
+        request.session["id"] = {
             "user_id": user.id,
-            "business": ProviderSerializer(business, context={'request': request},
-                                           many=True).data if business else None,
-            "coffees": CoffeeSerializer(product, context={'request': request}, many=True).data if product else None,
-            "jwt": token
-        })
+            "business": ProviderSerializer(business, context={"request": request}, many=True).data if business else None,
+            "coffees": CoffeeSerializer(product, context={"request": request}, many=True).data if product else None
+        }
 
-        return response
+        return redirect(f"http://127.0.0.1:8000/core/biz/{provider.id}/", id=user.id)
 
 
 class UserLogoutView(APIView):
     def post(self, request):
         response = Response()
+        auth.logout(request)
         response.delete_cookie("jwt")
         response.data = {
-            "message": "success"
+            "message": "Logout success"
         }
         return response
 
