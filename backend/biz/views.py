@@ -21,10 +21,10 @@ from rest_framework.views import APIView
 
 from .models import Coffee, Cake, Place, Order, OrderCoffee, \
     OrderSnacks, Snacks, OrderCake, OrderHistory
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, generics
 
 from .serializers import CoffeeSerializer, CakeSerializer, OpenDayProviderSerializer, \
-    ProductSerializer, ProviderSerializer, SnacksSerializer, PlaceSerializer, \
+    ProductSerializer, ProviderSerializer, SnackSerializer, PlaceSerializer, \
     OrderSerializer, OrderCoffeeSerializer, OrderCakeSerializer, \
     OrderSnackSerializer, OrderHistorySerializer
 
@@ -217,7 +217,7 @@ class CakeViewSet(viewsets.ModelViewSet):
 
 class SnacksViewSet(viewsets.ModelViewSet):
     queryset = Snacks.objects.all()
-    serializer_class = SnacksSerializer
+    serializer_class = SnackSerializer
 
 
 class PlaceViewSet(viewsets.ModelViewSet):
@@ -700,7 +700,7 @@ class ProviderView(APIView):
         })
 
 
-class ProviderOrders(APIView):
+class ProviderOrders(generics.ListAPIView):
     def get(self, request, id):
         orders = Order.objects.filter(provider=id)
         serializer = OrderSerializer(orders, many=True)

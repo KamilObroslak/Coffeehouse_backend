@@ -34,7 +34,7 @@ urlpatterns = [
     # Core part
     path("", index, name="index"),  # OK @ OK
     path("user_register", UserRegisterView.as_view()),  # OK @ OK
-    path("provider_login/", ProviderLoginView.as_view()),  # OK
+    path("biz/login/", ProviderLoginView.as_view()),  # OK
     path("logout/", UserLogoutView.as_view()),  # OK
     path("userdelete/<token>", userdelete),  # OK @ OK
 

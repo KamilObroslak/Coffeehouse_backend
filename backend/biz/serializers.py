@@ -1,5 +1,7 @@
 from django.contrib.auth import get_user_model
-from rest_framework import serializers, request
+from django.contrib.auth.models import User
+from rest_framework import serializers
+
 from .models import Coffee, Cake, Order, Place, Provider, OpenDayProvider, \
     Product, Snacks, OrderCoffee, OrderCake, OrderSnacks, OrderHistory, OrderStatus
 
@@ -9,8 +11,8 @@ user = get_user_model()
 class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = user
-        fields = ["id", "email", "password", "password2"]
+        model = User
+        fields = ["id", "username"]
 
 
 class ProviderSerializer(serializers.HyperlinkedModelSerializer):
@@ -70,24 +72,26 @@ class CoffeeSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class CakeSerializer(serializers.HyperlinkedModelSerializer):
-    owner = serializers.HyperlinkedModelSerializer
+    owner_id = serializers.StringRelatedField(source="owner.id")
+    owner_name = serializers.StringRelatedField(source="owner.name")
+    price = serializers.HyperlinkedModelSerializer
 
     class Meta:
         model = Cake
-        fields = ["id", "name", "price", "description", "gluten",
-                  "owner", "active"]
+        fields = ["id", "name", "price", "description", "gluten", "owner_id", "owner_name", "active"]
 
     def get_owner(self, obj):
         return obj.owner.name
 
 
-class SnacksSerializer(serializers.HyperlinkedModelSerializer):
-    owner = serializers.HyperlinkedModelSerializer
+class SnackSerializer(serializers.HyperlinkedModelSerializer):
+    owner_id = serializers.StringRelatedField(source="owner.id")
+    owner_name = serializers.StringRelatedField(source="owner.name")
+    price = serializers.HyperlinkedModelSerializer
 
     class Meta:
         model = Snacks
-        fields = ["id", "name", "price", "description", "gluten",
-                  "owner", "active"]
+        fields = ["id", "name", "price", "description", "gluten", "owner_id", "owner_name", "active"]
 
     def get_owner(self, obj):
         return obj.owner.name
@@ -98,7 +102,7 @@ class PlaceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Place
-        fields = ["id", "spot_amount", "availability", "owner"]
+        fields = ["id", "name", "spot_amount", "availability", "owner"]
 
     def get_owner(self, obj):
         return obj.owner.name
@@ -113,13 +117,26 @@ class OrderStatusSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    owner = serializers.HyperlinkedModelSerializer
-    provider = serializers.HyperlinkedModelSerializer
+
+    class OwnerSerializer(serializers.Serializer):
+        id = serializers.IntegerField()
+        phone = serializers.CharField()
+        owner = serializers.CharField()
+
+    owner = OwnerSerializer(read_only=True)
+    provider = serializers.CharField(source="provider.name")
+    coffees = CoffeeSerializer(many=True, read_only=True)
+    cakes = CakeSerializer(many=True, read_only=True)
+    snacks = SnackSerializer(many=True, read_only=True)
+    spot = PlaceSerializer(read_only=True)
 
     class Meta:
         model = Order
-        fields = ["id", "spot", "total_price", "coffees", "cakes", "snacks", "takeaway_order",
-                  "owner", "status", "order_datatime", "provider"]
+        fields = '__all__'
+        extra_kwargs = {
+            "coffees": {'write_only': True},
+            "cakes": {'write_only': True},
+            "snacks": {'write_only': True}}
 
     def get_owner(self, obj):
         return obj.owner.name
@@ -129,56 +146,6 @@ class OrderSerializer(serializers.ModelSerializer):
 
     def get_coffee(self, obj):
         return obj.coffee.price
-
-
-# class OrderSerializer(serializers.ModelSerializer):
-#     owner = serializers.HyperlinkedModelSerializer
-#     provider = serializers.HyperlinkedModelSerializer
-#
-#     coffees = serializers.SerializerMethodField()
-#     cakes = serializers.SerializerMethodField()
-#     snacks = serializers.SerializerMethodField()
-#
-#     class Meta:
-#         model = Order
-#         fields = ["id", "spot", "total_price", "coffees", "cakes", "snacks", "takeaway_order",
-#                   "owner", "status", "order_datatime", "provider"]
-#
-#         def get_owner(self, obj):
-#             return obj.owner.name
-#
-#         def get_provider(self, obj):
-#             return obj.owner.name
-#
-#         def get_coffees(self, obj):
-#             coffees_data = []
-#             for coffee_order in obj.coffees.all():
-#                 coffee_data = {
-#                     "name": coffee_order.coffee.name,
-#                     "quantity": coffee_order.quantity
-#                 }
-#                 coffees_data.append(coffee_data)
-#             return coffees_data
-#
-#         def get_cakes(self, obj):
-#             cakes_data = []
-#             for cake_order in obj.cake.all():
-#                 cake_data = {
-#                     "name": cake_order.cake.name,
-#                     "quantity": cake_order.quantity
-#                 }
-#                 cakes_data.append(cake_data)
-#             return cakes_data
-#
-#         def get_snacks(self, obj):
-#             snacks_data = []
-#             for snack_order in obj.snacks.all():
-#                 snack_data = {
-#                     "name": snack_order.snacks.name,
-#                     "quantity": snack_order.quantity
-#                 }
-#                 snacks_data.append(snack_data)
-#             return snacks_data
 
 
 class OrderCoffeeSerializer(serializers.ModelSerializer):
@@ -201,7 +168,7 @@ class OrderCakeSerializer(serializers.ModelSerializer):
 
 class OrderSnackSerializer(serializers.ModelSerializer):
     order = OrderSerializer()
-    snacks = SnacksSerializer()
+    snacks = SnackSerializer()
 
     class Meta:
         model = OrderSnacks
@@ -226,7 +193,7 @@ class ProvidersForClientSerializer(serializers.HyperlinkedModelSerializer):
 class ProviderForClientSerializer(serializers.ModelSerializer):
     coffees = CoffeeSerializer()
     cakes = CakeSerializer()
-    snacks = SnacksSerializer()
+    snacks = SnackSerializer()
 
     class Meta:
         model = Provider
