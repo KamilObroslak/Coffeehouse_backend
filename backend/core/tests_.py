@@ -1,8 +1,8 @@
 from django.test import TestCase
-from django.urls import reverse
-
-from core.models import *
-from faker import Faker
+# from django.urls import reverse
+#
+# from core.models import *
+# from faker import Faker
 from django.contrib.auth.models import User
 
 
@@ -56,21 +56,3 @@ class UserLoginTestCase(TestCase):
         self.user.delete()
         self.assertFalse(User.objects.filter(username="example_client").exists())
         print("UserLoginTestCase test_user_delete OK")
-
-
-# class UserLogoutTestCase(TestCase):
-#
-#     def test_user_login(self):
-#         response = self.client.post('/core/login/', {'username': 'example_client', 'password': 'admin'})
-#         self.assertEqual(response.status_code, 200)  # Sprawdzam, czy żądanie logowania zostało pomyślnie przetworzone.
-#         self.assertTrue(response.wsgi_request.user.is_authenticated)
-#         print("UserLoginTestCase test_user_login OK")
-#
-#     def test_user_logout(self):
-#         response = self.client.post("/core/logout", {})
-#         self.assertIn(response.status_code, [302, 301, 200]) # 302 to przekierowanie 200 OK
-#         if response.status_code in [302, 301]:
-#             self.assertRedirects(response, reverse("/core/login/"))
-#         else:
-#             self.assertTrue(response.wsgi_request.user.is_authenticated)
-#         print("UserLogoutTestCase test_user_logout OK")

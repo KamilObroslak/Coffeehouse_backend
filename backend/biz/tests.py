@@ -3,7 +3,7 @@ from django.urls import reverse
 
 from biz.models import OpenDayProvider
 from core.models import *
-from faker import Faker
+# from faker import Faker
 from django.contrib.auth.models import User
 
 

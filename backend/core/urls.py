@@ -25,36 +25,33 @@ router.register(r"coffeeorder", OrderCoffeeSet)
 router.register(r"cakeorder", OrderCakeSet)
 router.register(r"snackorder", OrderSnackSet)
 router.register(r"order/history", OrderHistorySet)
-
 urlpatterns = [
     path("api/", include(router.urls)),
     path("api-auth/", include("rest_framework.urls")),
-    # path("user_register/staff/", StaffRegisterView.as_view()),
 
     # Core part
     path("", index, name="index"),  # OK @ OK
     path("user_register", UserRegisterView.as_view()),  # OK @ OK
-    path("biz/login/", ProviderLoginView.as_view()),  # OK
     path("logout/", UserLogoutView.as_view()),  # OK
     path("userdelete/<token>", userdelete),  # OK @ OK
 
     # Client part
-    path("user_register/<id>/client/", ClientRegisterView.as_view()),  # OK ?
-    path("client/login/", ClientLogin.as_view()),
-    path("client/<id>/updateorder/<order>", OrderUpdateView.as_view()),  # OK
-    path("client/<id>/", ClientForMe.as_view()),
+    path("user_register/<id>/client/", ClientRegisterView.as_view()),  # OK
+    path("client/login/", ClientLogin.as_view()),  # OK
+    path("client/<id>/", ClientForMe.as_view()),  # OK
     path("client/<id>/businesses/", ProvidersForMe.as_view()),  # OK
     path("client/<client>/businesses/<provider>/", ProviderForMe.as_view()),  # OK
     path("client/<client>/businesses/<provider>/spots/", SpotsForMe.as_view()),  # OK
     path("client/<client>/businesses/<provider>/spots/<spot>", NewOrderView.as_view()),  # OK @ OK
-    path("client/<client>/history/", OrderHistoryClient.as_view()),
+    path("client/<client>/history/", OrderHistoryClient.as_view()),  # OK
 
     # Business part
     path("user_register/<id>/biz/", BusinessRegisterView.as_view()),  # OK
-    path("biz/<int:id>/", ProviderView.as_view(), name="provider_view"),
+    path("biz/login/", ProviderLoginView.as_view()),  # OK ?
+    path("biz/<int:id>/", ProviderView.as_view(), name="provider_view"),  # OK ?
     path("biz/<id>/updatehours", UpdateHours.as_view()),  # OK
-
-    path("biz/<id>/ordershistory/", ProviderOrders.as_view()),
+    path("biz/<id>/ordershistory/", ProviderOrders.as_view()),  # OK
+    path("biz/<id>/updateorder/<order>", OrderUpdateView.as_view()),  # OK
 
     path('biz/<id>/addcoffee', AddCoffeeView.as_view()),  # OK
     path("biz/<id>/editcoffee/<coffee>", EditCoffeeView.as_view()),  # OK

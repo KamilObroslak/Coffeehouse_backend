@@ -20,7 +20,6 @@ class ProviderSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Provider
-        # fields = ["id", "name", "owner"]
         fields = ["id", "name", "city", "postcode", "street",
                   "kind", "owner", "description", "facebook_link", "instagram_link"]
 

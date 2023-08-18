@@ -27,10 +27,6 @@ class Provider(models.Model):
 
     def __str__(self):
         return self.name
-    #
-    # def reminder(self):
-    #     # kod
-    #     pass
 
 
 class Product(models.Model):
@@ -198,16 +194,3 @@ class OrderHistory(models.Model):
 
     def __str__(self):
         return str(self.order_id)
-
-#
-# class Reminder(models.Model):
-#     provider = models.ForeignKey(Provider, on_delete=models.CASCADE)
-#     reminder_date = models.DateTimeField(default=timezone.now())
-#     sent = models.BooleanField(default=True)
-#
-#     class Meta:
-#         verbose_name = "Reminder"
-#         verbose_name_plural = "Reminders"
-#
-#     def __str__(self):
-#         return str(self.provider)
