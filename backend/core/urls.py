@@ -1,15 +1,15 @@
 from django.urls import path, include
+from django.contrib.auth import views as auth_views
 from rest_framework import routers
 
 from biz.views import BusinessRegisterView, UpdateHours, AddCoffeeView, AddCakeView, AddSnackView, NewOrderView, \
     OrderUpdateView, EditCoffeeView, EditCakeView, EditSnackView, DeleteCoffeeView, DeleteCakeView, DeleteSnackView, \
     AddPlaceView, EditPlaceView, DeletePlaceView, BusinessViewSet, OpenDayProviderViewSet, ProductViewSet, \
     CoffeeViewSet, CakeViewSet, SnacksViewSet, PlaceViewSet, OrderViewSet, OrderCoffeeSet, OrderCakeSet, \
-    OrderSnackSet, OrderHistorySet, ProviderView, ProviderOrders
+    OrderSnackSet, OrderHistorySet, ProviderView, ProviderOrders, ProviderLoginView
 from client.views import ClientRegisterView, ProvidersForMe, ProviderForMe, SpotsForMe, \
     OrderHistoryClient, ClientLogin, ClientForMe, ClientViewSet
-from .views import UserRegisterView, ProviderLoginView, \
-    UserLogoutView, userdelete, index
+from .views import UserRegisterView, UserLogoutView, userdelete, index
 
 router = routers.DefaultRouter()
 router.register(r"clients", ClientViewSet)
@@ -30,9 +30,10 @@ urlpatterns = [
     path("api-auth/", include("rest_framework.urls")),
 
     # Core part
-    path("", index, name="index"),  # OK @ OK
+    path("", index, name="start"),
     path("user_register", UserRegisterView.as_view()),  # OK @ OK
-    path("logout/", UserLogoutView.as_view()),  # OK
+    # path("logout/", UserLogoutView.as_view()),  # OK
+    path("logout/", auth_views.LogoutView.as_view(next_page="start"), name="logout"),  # OK
     path("userdelete/<token>", userdelete),  # OK @ OK
 
     # Client part

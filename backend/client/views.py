@@ -4,7 +4,11 @@ from django.contrib import auth
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect, get_object_or_404
 import jwt as jwt
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import never_cache
 from rest_framework import viewsets, status
+from rest_framework.authentication import SessionAuthentication
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -33,8 +37,10 @@ class ClientRegisterView(APIView):
 
 
 class ClientLogin(APIView):
+
+    @method_decorator(never_cache)
     def get(self, request):
-        return render(request, "login_register_client.html")
+        return render(request, 'client_login.html')
 
     def post(self, request):
         username = request.data.get("username")
@@ -69,6 +75,7 @@ class ClientLogin(APIView):
         }
 
         return redirect(f"http://127.0.0.1:8000/core/client/{client.id}/", id=user.id)
+        #return None
 
 
 class ClientViewSet(viewsets.ModelViewSet):
@@ -84,8 +91,13 @@ class ClientForMe(APIView):
 
 
 class ProvidersForMe(APIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
     def get(self, request, id):
-        providers = Provider.objects.all()
+        client = Client.objects.get(id=id)
+        client_localization = client.city
+        providers = Provider.objects.filter(city=client_localization)
         serializer = ProvidersForClientSerializer(providers, many=True)
         return Response(serializer.data)
 

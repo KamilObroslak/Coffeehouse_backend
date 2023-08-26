@@ -89,11 +89,11 @@ DATABASES = {
 # DATABASES = {
 #     "default": {
 #         "ENGINE": "django.db.backends.postgresql",
-#         "NAME": "postgres",
+#         "NAME": "db",
 #         "USER": "db",
 #         "PASSWORD": "db",
 #         "HOST": "db",  # set in docker-compose.yml
-#         "PORT": 5432,  # default postgres port
+#         "PORT": "5432",  # default postgres port
 #     }
 # }
 

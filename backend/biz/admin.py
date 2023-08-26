@@ -1,6 +1,7 @@
 from django.contrib import admin
 from import_export.admin import ImportExportModelAdmin
 
+
 from .models import Provider, OpenDayProvider, Coffee, Cake, Snacks, Place, Order, OrderHistory, OrderCoffee, OrderCake, \
     OrderSnacks, Product
 

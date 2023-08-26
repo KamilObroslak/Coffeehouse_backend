@@ -1,91 +1,14 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>House of Cafe</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strona powitalna</title>
 </head>
 <body>
-    <h1>House of Cafe</h1>
-
-    <h2>Rejestracja</h2>
-    <form id="registration-form" method="post">
-        {% csrf_token %}
-
-        <label for="username">Nazwa użytkownika:</label>
-        <input type="text" id="username" name="username" required><br>
-
-        <label for="email">Adres e-mail:</label>
-        <input type="email" id="email" name="email" required><br>
-
-        <label for="password">Hasło:</label>
-        <input type="password" id="password" name="password" required><br>
-
-        <label for="password2">Potwierdź hasło:</label>
-        <input type="password" id="password2" name="password2" required><br>
-
-        <button type="submit">Zarejestruj się</button>
-    </form>
-
-    <div id="data-container"></div>
-
-    <script>
-        // Funkcja pobierająca dane z endpointu DRF i wyświetlająca je na stronie
-        function getDataFromBackend() {
-            fetch('http://127.0.0.1:8000/core/')
-                .then(response => response.json())
-                .then(data => {
-                    // Tutaj możesz przetworzyć dane, np. wyświetlić je na stronie
-                    const dataContainer = document.getElementById('data-container');
-                    dataContainer.innerHTML = JSON.stringify(data, null, 2);
-                })
-                .catch(error => {
-                    console.error('Wystąpił błąd:', error);
-                });
-        }
-
-        // Funkcja obsługująca formularz rejestracji
-        function handleRegistration(event) {
-            event.preventDefault();
-
-            const form = event.target;
-            const password = form['password'].value;
-            const confirmPassword = form['password2'].value;
-
-            if (password !== confirmPassword) {
-                alert('Hasła nie pasują do siebie. Sprawdź wpisane hasła.');
-                return;
-            }
-
-            const formData = new FormData(form);
-
-            formData.append("csrfmiddlewaretoken", "{{ csrf_token }}");
-
-            fetch('http://127.0.0.1:8000/core/user_register', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRFToken': '{{ csrf_token }}'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Rejestracja zakończona sukcesem:', data);
-                // Możesz dodać tu odpowiedni komunikat dla użytkownika o udanej rejestracji
-
-                // Wykonaj zapytanie GET po zarejestrowaniu użytkownika
-                getDataFromBackend();
-            })
-            .catch(error => {
-                console.error('Wystąpił błąd podczas rejestracji:', error);
-                // Możesz dodać tu odpowiedni komunikat dla użytkownika o nieudanej rejestracji
-            });
-        }
-
-        // Wywołanie funkcji pobierającej dane po załadowaniu strony
-        window.onload = getDataFromBackend;
-
-        // Nasłuchuj na zdarzenie submit formularza i wykonaj funkcję handleRegistration
-        const registrationForm = document.getElementById('registration-form');
-        registrationForm.addEventListener('submit', handleRegistration);
-    </script>
+    <h1>Witam na stronie główiej</h1>
+    <p>Cieszymy się że się tu pojawiłeś!</p>
+    <a href="/login/">Login</a>
+    <a href="/register/">Register</a>
 </body>
 </html>

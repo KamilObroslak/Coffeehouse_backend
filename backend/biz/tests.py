@@ -39,7 +39,7 @@ class UpdateHoursTestCase(TestCase):
 
     def test_opendayprovider_modify(self):
         new_days = OpenDayProvider(monday=True,
-                                   monday_from="05:00",
+                                   monday_from="06:00",
                                    monday_to="15:00",
                                    tuesday=True,
                                    tuesday_from="06:00",

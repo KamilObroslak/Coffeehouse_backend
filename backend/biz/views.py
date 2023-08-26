@@ -1,7 +1,8 @@
-from datetime import datetime
+import datetime
+from datetime import datetime, timedelta
 
 from django.core.exceptions import ObjectDoesNotExist
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from rest_framework.authentication import SessionAuthentication
@@ -76,6 +77,9 @@ class BusinessViewSet(viewsets.ModelViewSet):
 
 
 class UpdateHours(APIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
     def post(self, request, id):
         print(request.data)
         print("test")
@@ -416,6 +420,9 @@ class NewOrderView(APIView):
 
 
 class OrderUpdateView(APIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
     def post(self, request, id, order):
         print(request.data)
         token = request.data["token"]
@@ -436,6 +443,8 @@ class OrderUpdateView(APIView):
 
 
 class AddCoffeeView(APIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, id):
         return render(request, 'add_coffee.html')
@@ -469,6 +478,9 @@ class AddCoffeeView(APIView):
 
 
 class EditCoffeeView(APIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
     def post(self, request, id, coffee):
         print(request.data)
         name = request.data["name"]
@@ -490,6 +502,9 @@ class EditCoffeeView(APIView):
 
 
 class DeleteCoffeeView(APIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
     def delete(self, request, id, coffee):
         print(request.data)
         token = request.data["token"]
@@ -505,6 +520,9 @@ class DeleteCoffeeView(APIView):
 
 
 class AddCakeView(APIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
     def post(self, request, id):
         print(request.data)
         name = request.data["name"]
@@ -533,6 +551,9 @@ class AddCakeView(APIView):
 
 
 class EditCakeView(APIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
     def post(self, request, id, cake):
         print(request.data)
         name = request.data["name"]
@@ -554,6 +575,9 @@ class EditCakeView(APIView):
 
 
 class DeleteCakeView(APIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
     def delete(self, request, id, cake):
         print(request.data)
         token = request.data["token"]
@@ -569,6 +593,9 @@ class DeleteCakeView(APIView):
 
 
 class AddSnackView(APIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
     def post(self, request, id):
         print(request.data)
         name = request.data["name"]
@@ -589,6 +616,9 @@ class AddSnackView(APIView):
 
 
 class EditSnackView(APIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
     def post(self, request, id, snack):
         print(request.data)
         name = request.data["name"]
@@ -618,6 +648,9 @@ class EditSnackView(APIView):
 
 
 class DeleteSnackView(APIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
     def delete(self, request, id, snack):
         print(request.data)
         token = request.data["token"]
@@ -633,6 +666,9 @@ class DeleteSnackView(APIView):
 
 
 class AddPlaceView(APIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
     def post(self, request, id):
         print(request.data)
         spot_amount = request.data["spot_amount"]
@@ -649,6 +685,9 @@ class AddPlaceView(APIView):
 
 
 class EditPlaceView(APIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
     def post(self, request, id, place):
         print(request.data)
         spot_amount = request.data["spot_amount"]
@@ -668,6 +707,9 @@ class EditPlaceView(APIView):
 
 
 class DeletePlaceView(APIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
     def delete(self, request, id, place):
         print(request.data)
         token = request.data["token"]
@@ -688,20 +730,80 @@ class ProviderView(APIView):
 
     @method_decorator(never_cache)
     def get(self, request, id):
-        business_data = request.session.get("id")
-        print(business_data)
-        user_id = id
-        print(user_id)
-        business_id = business_data["business"][0]["id"]
-        print(business_id)
-        return render(request, 'provider.html', {
-            "user_id": business_id,
-            "business_data": business_data
-        })
+        try:
+            business_data = request.session.get("id")
+            # import pdb;pdb.set_trace()
+            print(business_data)
+            user_id = id
+            print(user_id)
+            business_id = business_data["business"][0]["id"]
+            print(business_id)
+            return render(request, 'provider.html', {
+                "user_id": business_id,
+                "business_data": business_data
+            })
+        except UserToken.DoesNotExist:
+            return render(request, "user_not_found.html")
 
 
 class ProviderOrders(generics.ListAPIView):
-    def get(self, request, id):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = OrderSerializer
+
+    def get_queryset(self):
+        id = self.kwargs["id"]
         orders = Order.objects.filter(provider=id)
-        serializer = OrderSerializer(orders, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return orders
+
+
+class ProviderLoginView(APIView):
+
+    def get(self, request):
+
+        return render(request, 'biz_login.html')
+
+    def post(self, request):
+        username = request.data.get("username")
+        password = request.data.get("password")
+        context = {}
+
+        if username is None or password is None:
+            context["error"] = "Proszę podać zarówno nazwę użytkownika, jak i hasło."
+            return Response(context, status=status.HTTP_400_BAD_REQUEST)
+
+        user = auth.authenticate(username=username, password=password)
+
+        if not user:
+            context["error"] = "Podane dane logowania są nieprawidłowe."
+            return Response(context, status=status.HTTP_401_UNAUTHORIZED)
+
+        auth.login(request, user)
+
+        payload = {
+            'id': user.id,
+            'exp': datetime.utcnow() + timedelta(minutes=60),
+            'iat': datetime.utcnow()
+        }
+
+        token = jwt.encode(payload, "secret", algorithm="HS256")
+
+        owner = User.objects.get(id=user.id)
+        provider = Provider.objects.get(owner=owner)
+        business = None
+        product = None
+
+        try:
+            business = Provider.objects.filter(owner=owner.id)
+            for i in business:
+                product = Product.objects.filter(owner=i)
+        except Provider.DoesNotExist:
+            pass
+
+        request.session["id"] = {
+            "user_id": user.id,
+            "business": ProviderSerializer(business, context={"request": request}, many=True).data if business else None,
+            "coffees": CoffeeSerializer(product, context={"request": request}, many=True).data if product else None
+        }
+
+        return redirect(f"http://127.0.0.1:8000/core/biz/{provider.id}/", id=user.id)
