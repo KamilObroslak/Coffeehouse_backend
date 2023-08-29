@@ -9,7 +9,7 @@ from biz.views import BusinessRegisterView, UpdateHours, AddCoffeeView, AddCakeV
     OrderSnackSet, OrderHistorySet, ProviderView, ProviderOrders, ProviderLoginView
 from client.views import ClientRegisterView, ProvidersForMe, ProviderForMe, SpotsForMe, \
     OrderHistoryClient, ClientLogin, ClientForMe, ClientViewSet
-from .views import UserRegisterView, UserLogoutView, userdelete, index
+from .views import UserRegisterView, userdelete, index
 
 router = routers.DefaultRouter()
 router.register(r"clients", ClientViewSet)
@@ -32,7 +32,6 @@ urlpatterns = [
     # Core part
     path("", index, name="start"),
     path("user_register", UserRegisterView.as_view()),  # OK @ OK
-    # path("logout/", UserLogoutView.as_view()),  # OK
     path("logout/", auth_views.LogoutView.as_view(next_page="start"), name="logout"),  # OK
     path("userdelete/<token>", userdelete),  # OK @ OK
 
