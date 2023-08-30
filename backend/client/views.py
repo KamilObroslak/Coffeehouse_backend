@@ -20,6 +20,10 @@ from client.serializers import ClientSerializer
 
 
 class ClientRegisterView(APIView):
+
+    def get(self, request, id):
+        return render(request, 'client_register.html')
+
     def post(self, request, id):
         context = {}
         try:

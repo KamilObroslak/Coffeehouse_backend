@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add New Snack</title>
+</head>
+<body>
+    <h1>Add New Snack</h1>
+    <form id="snack-form" method="post" data-user-id="{{ user_id }}">
+        {% csrf_token %}
+
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required><br>
+
+        <label for="price">Price:</label>
+        <input type="number" id="price" name="price" required><br>
+
+        <label for="description">Description:</label>
+        <textarea id="description" name="description" required></textarea><br>
+
+        <label for="gluten">Gluten:</label>
+        <input type="checkbox" id="gluten" name="gluten"><br>
+
+        <label for="active">Active:</label>
+        <input type="checkbox" id="active" name="active" checked><br>
+
+        <button type="submit">Add Snack</button>
+    </form>
+
+    <div id="message"></div>
+
+    <script>
+        // Funkcja obsługująca formularz dodawania przekąski
+            function addSnack(event) {
+            event.preventDefault();
+
+            const form = event.target;
+            const formData = new FormData(form);
+
+            const userId = form.getAttribute('data-user-id');
+            // Tutaj muszę ręcznie dodawać id biznesu żeby działo, jeszcze nie wiem jak to ogarnąć Frontem
+            const url = `http://127.0.0.1:8000/core/biz/2/addsnack`;
+
+            fetch(url, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Response:', data);
+                const messageContainer = document.getElementById('message');
+                messageContainer.innerHTML = data.message;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                const messageContainer = document.getElementById('message');
+                messageContainer.innerHTML = 'An error occurred while adding snack.';
+            });
+        }
+
+        // Nasłuchuj na zdarzenie submit formularza i wykonaj funkcję addCoffee
+        const snackForm = document.getElementById('snack-form');
+        snackForm.addEventListener('submit', addSnack);
+    </script>
+</body>
+</html>

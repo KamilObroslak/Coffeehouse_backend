@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>House of Cafe</title>
+</head>
+<body>
+    <h1>House of Cafe</h1>
+
+    <h2>Logowanie dla Klienta</h2>
+    <form id="login-form" method="post">
+        {% csrf_token %}
+
+        <label for="username">Nazwa użytkownika:</label>
+        <input type="text" id="username" name="username" required><br>
+
+        <label for="password">Hasło:</label>
+        <input type="password" id="password" name="password" required><br>
+
+        <button type="submit">Zaloguj się</button>
+    </form>
+
+    <div id="data-container"></div>
+
+   <script>
+    // Funkcja obsługująca formularz logowania
+    function handleLogin(event) {
+        event.preventDefault();
+
+        const form = event.target;
+        const formData = new FormData(form);
+
+        formData.append("csrfmiddlewaretoken", "{{ csrf_token }}");
+
+        fetch('http://127.0.0.1:8000/core/provider_login/', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Wystąpił błąd podczas logowania.');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Logowanie zakończone sukcesem:', data);
+            // Możesz dodać tu odpowiedni komunikat dla użytkownika o udanym logowaniu
+
+<!--            // Przekierowanie na stronę z danymi biznesu po zalogowaniu-->
+<!--            if (data.business && data.business.length > 0) {-->
+<!--                const businessId = data.business[0].id; // Załóżmy, że pobieramy pierwszy biznes z listy-->
+<!--                window.location.replace = `http://127.0.0.1:8000/core/biz/${businessId}/`;-->
+<!--            } else {-->
+<!--                // W przypadku braku biznesu przekieruj na inny adres lub wyświetl odpowiedni komunikat-->
+<!--                window.location.href = 'http://127.0.0.1:8000/core/'; // Załóżmy, że przechodzimy na stronę główną-->
+<!--            }-->
+<!--        })-->
+<!--        .catch(error => {-->
+<!--            console.error('Wystąpił błąd podczas logowania:', error);-->
+<!--            // Możesz dodać tu odpowiedni komunikat dla użytkownika o nieudanym logowaniu-->
+<!--        });-->
+<!--    }-->
+
+<!--    // Nasłuchuj na zdarzenie submit formularza i wykonaj funkcję handleLogin-->
+<!--    const loginForm = document.getElementById('login-form');-->
+<!--    loginForm.addEventListener('submit', handleLogin);-->
+</script>
+
+</body>
+</html>

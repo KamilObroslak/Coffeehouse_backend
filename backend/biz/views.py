@@ -81,7 +81,20 @@ class UpdateHours(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, id):
-        return render(request, 'open_days.html')
+        try:
+            business_data = request.session.get("id")
+            user_id = id
+            business_id = business_data["business"][0]["id"]
+
+            open_days_data = OpenDayProvider.objects.filter(owner_id=business_id).first()
+
+            return render(request, 'open_days.html', {
+                "user_id": business_id,
+                "business_data": business_data,
+                "open_days_data": open_days_data,
+            })
+        except UserToken.DoesNotExist:
+            return render(request, "user_not_found.html")
 
     def post(self, request, id):
         print(request.data)
@@ -426,23 +439,19 @@ class OrderUpdateView(APIView):
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
+    def get(self, request, id, order):
+        return render(request, 'change_status.html')
+
     def post(self, request, id, order):
         print(request.data)
-        token = request.data["token"]
         new_status = request.data["new_status"]
-        user = request.data["user"]
-        user = User.objects.get(id=user)
-        check = UserToken.objects.get(owner=user, token=token)
-        if check:
-            order_obj = Order.objects.get(id=order)
-            now = datetime.now()
-            order_obj.status = new_status
-            order_obj.save()
-            order_history = OrderHistory.objects.create(order_id=order_obj, time_of_change=now, status=new_status)
-            order_history.save()
-            return Response({"message": "Order has been changed"})
-        else:
-            return Response({"message": "Problem with authorization or data"})
+        order_obj = Order.objects.get(id=order)
+        now = datetime.now()
+        order_obj.status = new_status
+        order_obj.save()
+        order_history = OrderHistory.objects.create(order_id=order_obj, time_of_change=now, status=new_status)
+        order_history.save()
+        return Response({"message": "Order has been changed"})
 
 
 class AddCoffeeView(APIView):
@@ -483,6 +492,9 @@ class AddCoffeeView(APIView):
 class EditCoffeeView(APIView):
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]
+
+    def get(self, request, id, coffee):
+        return render(request, 'edit_coffee.html')
 
     def post(self, request, id, coffee):
         print(request.data)
@@ -560,6 +572,9 @@ class EditCakeView(APIView):
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
+    def get(self, request, id, cake):
+        return render(request, 'edit_cake.html')
+
     def post(self, request, id, cake):
         print(request.data)
         name = request.data["name"]
@@ -636,6 +651,9 @@ class EditSnackView(APIView):
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
+    def get(self, request, id, snack):
+        return render(request, 'edit_snack.html')
+
     def post(self, request, id, snack):
         print(request.data)
         name = request.data["name"]
@@ -682,6 +700,17 @@ class DeleteSnackView(APIView):
         return Response({"message": "Object not found"}, status=status.HTTP_404_NOT_FOUND)
 
 
+class PlacesView(generics.ListAPIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = PlaceSerializer
+
+    def get_queryset(self):
+        id = self.kwargs["id"]
+        places = Place.objects.filter(owner=id)
+        return places
+
+
 class AddPlaceView(APIView):
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]
@@ -704,6 +733,9 @@ class AddPlaceView(APIView):
 class EditPlaceView(APIView):
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]
+
+    def get(self, request, id, place):
+        return render(request, 'edit_place.html')
 
     def post(self, request, id, place):
         print(request.data)
@@ -750,14 +782,13 @@ class ProviderView(APIView):
         try:
             business_data = request.session.get("id")
             # import pdb;pdb.set_trace()
-            print(business_data)
             user_id = id
-            print(user_id)
             business_id = business_data["business"][0]["id"]
-            print(business_id)
+            open_days = OpenDayProvider.objects.get(owner__id=business_id)
             return render(request, 'provider.html', {
                 "user_id": business_id,
-                "business_data": business_data
+                "business_data": business_data,
+                "open_days": OpenDayProvider.objects.get(owner__id=business_id)
             })
         except UserToken.DoesNotExist:
             return render(request, "user_not_found.html")
@@ -767,6 +798,18 @@ class ProviderOrders(generics.ListAPIView):
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]
     serializer_class = OrderSerializer
+
+    # def get(self, request, id):
+    #     business_data = request.session.get("id")
+    #     business_id = business_data["business"][0]["id"]
+    #
+    #     try:
+    #         orders = OrderHistory.objects.filter(order_id__business_id=business_id)
+    #         return render(request, 'ordershistory.html', {
+    #             "orders": orders
+    #         })
+    #     except OrderHistory.DoesNotExist:
+    #         print("brak historii")
 
     def get_queryset(self):
         id = self.kwargs["id"]

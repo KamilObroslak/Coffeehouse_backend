@@ -6,7 +6,7 @@ from biz.views import BusinessRegisterView, UpdateHours, AddCoffeeView, AddCakeV
     OrderUpdateView, EditCoffeeView, EditCakeView, EditSnackView, DeleteCoffeeView, DeleteCakeView, DeleteSnackView, \
     AddPlaceView, EditPlaceView, DeletePlaceView, BusinessViewSet, OpenDayProviderViewSet, ProductViewSet, \
     CoffeeViewSet, CakeViewSet, SnacksViewSet, PlaceViewSet, OrderViewSet, OrderCoffeeSet, OrderCakeSet, \
-    OrderSnackSet, OrderHistorySet, ProviderView, ProviderOrders, ProviderLoginView
+    OrderSnackSet, OrderHistorySet, ProviderView, ProviderOrders, ProviderLoginView, PlacesView
 from client.views import ClientRegisterView, ProvidersForMe, ProviderForMe, SpotsForMe, \
     OrderHistoryClient, ClientLogin, ClientForMe, ClientViewSet
 from .views import UserRegisterView, userdelete, index
@@ -50,6 +50,7 @@ urlpatterns = [
     path("biz/login/", ProviderLoginView.as_view()),  # OK ?
     path("biz/<int:id>/", ProviderView.as_view(), name="provider_view"),  # OK ?
     path("biz/<id>/updatehours", UpdateHours.as_view()),  # OK
+    path("biz/<id>/orders/", ProviderOrders.as_view()),  # OK
     path("biz/<id>/ordershistory/", ProviderOrders.as_view()),  # OK
     path("biz/<id>/updateorder/<order>", OrderUpdateView.as_view()),  # OK
 
@@ -65,6 +66,7 @@ urlpatterns = [
     path("biz/<id>/editsnack/<snack>", EditSnackView.as_view()),  # OK
     path("biz/<id>/deletesnack/<snack>", DeleteSnackView.as_view()),  # OK !
 
+    path("biz/<id>/places", PlacesView.as_view()),  # OK
     path("biz/<id>/addplace", AddPlaceView.as_view()),  # OK
     path("biz/<id>/editplace/<place>", EditPlaceView.as_view()),  # OK
     path("biz/<id>/deleteplace/<place>", DeletePlaceView.as_view()),  # OK !
