@@ -10,8 +10,21 @@
 
     <div>
         <h2>Business Information</h2>
-        <!-- <p>{{ business_data|json_script }}</p> -->
         <p>{{ business_data }}</p>
+    </div>
+
+    <!-- Przyciski do dodawania produktów -->
+    <div>
+        <h2>Add Products</h2>
+        <button id="add-coffee-button">Add Coffee</button>
+        <button id="add-cake-button">Add Cake</button>
+        <button id="add-snack-button">Add Snack</button>
+    </div>
+
+    <!-- Przycisk do godzin pracy -->
+    <div>
+        <h2>Business Hours</h2>
+        <a href="http://127.0.0.1:8000/core/biz/{{ user_id }}/updatehours">Set Business Hours</a>
     </div>
 
     <!-- Przycisk wylogowania -->
@@ -38,9 +51,32 @@
             });
         }
 
+        // Obsługa dodawania produktów
+        function handleAddProduct(productType) {
+            let url;
+            if (productType === 'coffee') {
+                url = 'http://127.0.0.1:8000/core/biz/{{ user_id }}/addcoffee';
+            } else if (productType === 'cake') {
+                url = 'http://127.0.0.1:8000/core/biz/{{ user_id }}/addcake';
+            } else if (productType === 'snack') {
+                url = 'http://127.0.0.1:8000/core/biz/{{ user_id }}/addsnack';
+            }
+            window.location.href = url;
+        }
+
         // Nasłuchuj na kliknięcie przycisku wylogowania i wykonaj funkcję handleLogout
         const logoutButton = document.getElementById('logout-button');
         logoutButton.addEventListener('click', handleLogout);
+
+        // Nasłuchuj na kliknięcie przycisków dodawania produktów i wykonaj odpowiednią funkcję
+        const addCoffeeButton = document.getElementById('add-coffee-button');
+        addCoffeeButton.addEventListener('click', () => handleAddProduct('coffee'));
+
+        const addCakeButton = document.getElementById('add-cake-button');
+        addCakeButton.addEventListener('click', () => handleAddProduct('cake'));
+
+        const addSnackButton = document.getElementById('add-snack-button');
+        addSnackButton.addEventListener('click', () => handleAddProduct('snack'));
     </script>
 </body>
 </html>

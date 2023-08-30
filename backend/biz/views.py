@@ -80,6 +80,9 @@ class UpdateHours(APIView):
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
+    def get(self, request, id):
+        return render(request, 'open_days.html')
+
     def post(self, request, id):
         print(request.data)
         print("test")
@@ -523,6 +526,9 @@ class AddCakeView(APIView):
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
+    def get(self, request, id):
+        return render(request, 'add_cake.html')
+
     def post(self, request, id):
         print(request.data)
         name = request.data["name"]
@@ -596,13 +602,24 @@ class AddSnackView(APIView):
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
+    def get(self, request, id):
+        return render(request, 'add_snack.html')
+
     def post(self, request, id):
         print(request.data)
         name = request.data["name"]
         price = request.data["price"]
         description = request.data["description"]
-        gluten = request.data["gluten"]
-        active = request.data["active"]
+        x = request.data.get("gluten")
+        if x == True or "on":
+            gluten = True
+        else:
+            gluten = False
+        y = request.data.get("active")
+        if y == True or "on":
+            active = True
+        else:
+            active = False
         owner = Provider.objects.get(id=id)
 
         snack = Snacks.objects.create(name=name,
@@ -802,7 +819,8 @@ class ProviderLoginView(APIView):
 
         request.session["id"] = {
             "user_id": user.id,
-            "business": ProviderSerializer(business, context={"request": request}, many=True).data if business else None,
+            "business": ProviderSerializer(business, context={"request": request},
+                                           many=True).data if business else None,
             "coffees": CoffeeSerializer(product, context={"request": request}, many=True).data if product else None
         }
 

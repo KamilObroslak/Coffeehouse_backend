@@ -46,7 +46,7 @@ class UserRegisterView(APIView):
                     user = User.objects.create_user(username=request.data["username"],
                                                     email=request.data["email"],
                                                     password=request.data["password"],
-                                                    is_staff=False)
+                                                    is_staff=True)
                     token = UserToken(owner=user)
                     token.save()
                     auth.login(request, user)

@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Add New Coffee</title>
+    <title>Add New Snack</title>
 </head>
 <body>
-    <h1>Add New Coffee</h1>
-    <form id="coffee-form" method="post" data-user-id="{{ user_id }}">
+    <h1>Add New Snack</h1>
+    <form id="snack-form" method="post" data-user-id="{{ user_id }}">
         {% csrf_token %}
 
         <label for="name">Name:</label>
@@ -23,14 +23,14 @@
         <label for="active">Active:</label>
         <input type="checkbox" id="active" name="active" checked><br>
 
-        <button type="submit">Add Coffee</button>
+        <button type="submit">Add Snack</button>
     </form>
 
     <div id="message"></div>
 
     <script>
-        // Funkcja obsługująca formularz dodawania kawy
-            function addCoffee(event) {
+        // Funkcja obsługująca formularz dodawania przekąski
+            function addSnack(event) {
             event.preventDefault();
 
             const form = event.target;
@@ -38,7 +38,7 @@
 
             const userId = form.getAttribute('data-user-id');
             // Tutaj muszę ręcznie dodawać id biznesu żeby działo, jeszcze nie wiem jak to ogarnąć Frontem
-            const url = `http://127.0.0.1:8000/core/biz/2/addcoffee`;
+            const url = `http://127.0.0.1:8000/core/biz/2/addsnack`;
 
             fetch(url, {
                 method: 'POST',
@@ -56,13 +56,13 @@
             .catch(error => {
                 console.error('Error:', error);
                 const messageContainer = document.getElementById('message');
-                messageContainer.innerHTML = 'An error occurred while adding coffee.';
+                messageContainer.innerHTML = 'An error occurred while adding snack.';
             });
         }
 
         // Nasłuchuj na zdarzenie submit formularza i wykonaj funkcję addCoffee
-        const coffeeForm = document.getElementById('coffee-form');
-        coffeeForm.addEventListener('submit', addCoffee);
+        const snackForm = document.getElementById('snack-form');
+        snackForm.addEventListener('submit', addSnack);
     </script>
 </body>
 </html>
