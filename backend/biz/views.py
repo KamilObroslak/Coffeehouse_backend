@@ -41,36 +41,6 @@ def create_limited_permissions_group():
     return group
 
 
-class BusinessRegisterView(APIView):
-
-    def get(self, request, id):
-        return render(request, 'business_register.html')
-
-    def post(self, request, id):
-        print(request.data)
-        print("test")
-        context = {}
-        if request.method == "POST":
-            user = User.objects.get(id=id)
-            try:
-                check = Provider.objects.get(owner=user)
-                return Response({"message": "User already exists"})
-            except Provider.DoesNotExist:
-                provider = Provider.objects.create(name=request.data["business_name"],
-                                                   city=request.data["business_city"],
-                                                   postcode=request.data["business_postcode"],
-                                                   street=request.data["business_street"],
-                                                   kind=request.data["business_kind"],
-                                                   owner=user,
-                                                   description=request.data["business_description"],
-                                                   facebook_link=request.data["business_facebook_link"],
-                                                   instagram_link=request.data["business_instagram_link"])
-                provider.save()
-
-            return Response({"message": "User created successfully"})
-        return Response(status=status.HTTP_400_BAD_REQUEST)
-
-
 class BusinessViewSet(viewsets.ModelViewSet):
     queryset = Provider.objects.all()
     serializer_class = ProviderSerializer

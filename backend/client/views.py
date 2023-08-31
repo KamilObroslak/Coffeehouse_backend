@@ -19,27 +19,6 @@ from client.models import Client
 from client.serializers import ClientSerializer
 
 
-class ClientRegisterView(APIView):
-
-    def get(self, request, id):
-        return render(request, 'client_register.html')
-
-    def post(self, request, id):
-        context = {}
-        try:
-            if request.method == "POST":
-                user = User.objects.get(id=id)
-                client = Client.objects.create(phone=request.data["client_phone"],
-                                               city=request.data["client_city"],
-                                               postcode=request.data["client_postcode"],
-                                               street=request.data["client_street"],
-                                               owner=user)
-                client.save()
-                return Response({"message": "User created successfully"})
-        except:
-            return Response({"message": "User already exists"})
-
-
 class ClientLogin(APIView):
 
     @method_decorator(never_cache)
@@ -99,11 +78,18 @@ class ProvidersForMe(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, id):
-        client = Client.objects.get(id=id)
-        client_localization = client.city
-        providers = Provider.objects.filter(city=client_localization)
-        serializer = ProvidersForClientSerializer(providers, many=True)
-        return Response(serializer.data)
+        try:
+            client = Client.objects.get(id=id)
+            client_localization = client.city
+            providers = Provider.objects.filter(city=client_localization)
+
+            if not providers:
+                providers = Provider.objects.all()
+
+            serializer = ProvidersForClientSerializer(providers, many=True)
+            return Response(serializer.data)
+        except Client.DoesNotExist:
+            return Response({"message": "Client not found"})
 
 
 class ProviderForMe(APIView):

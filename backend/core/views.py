@@ -1,13 +1,11 @@
 from django.contrib import auth
 from django.contrib.auth.models import Group, User
-from django.shortcuts import render
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import never_cache
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .messages import SendEmail
+from biz.models import Provider
+from client.models import Client
 from .models import UserToken
 from rest_framework import status
 
@@ -25,10 +23,6 @@ def create_limited_permissions_group():
 
 class UserRegisterView(APIView):
 
-    # @method_decorator(never_cache)
-    def get(self, request):
-        return render(request, 'user_register.html')
-
     def post(self, request):
         print(request.data)
         print("test")
@@ -36,11 +30,11 @@ class UserRegisterView(APIView):
         if request.method == "POST":
             try:
                 user = User.objects.get(username=request.data["username"], email=request.data["email"])
-                context["error"] = "Podana email lub login już istnieje! Proszę użyć innego adresu!"
+                context["error"] = "Login or email already exist!"
                 return Response(context)
             except User.DoesNotExist:
                 if request.data["password"] != request.data["password2"]:
-                    context["error"] = "Podane hasła są takie same! Proszę wprowadzić takie same hasła!"
+                    context["error"] = "Two different passwords!"
                     return Response(context)
                 else:
                     user = User.objects.create_user(username=request.data["username"],
@@ -50,9 +44,32 @@ class UserRegisterView(APIView):
                     token = UserToken(owner=user)
                     token.save()
                     auth.login(request, user)
-                    send_email_instance = SendEmail()
-                    send_email_instance.send_email(recipient=user.email, token=token)
-                    return Response({"message": "User created successfully"})
+                    type = request.data["type"]
+                    if type == "1":
+                        kind = request.data["business_kind"]
+                        provider = Provider.objects.create(name=request.data["business_name"],
+                                                           city=request.data["business_city"],
+                                                           postcode=request.data["business_postcode"],
+                                                           street=request.data["business_street"],
+                                                           kind=kind,
+                                                           owner=user,
+                                                           description=request.data["business_description"],
+                                                           facebook_link=request.data["business_facebook_link"],
+                                                           instagram_link=request.data["business_instagram_link"])
+                        provider.save()
+                        # send_email_instance = SendEmail()
+                        # send_email_instance.send_email(recipient=user.email, token=token)
+                        return Response({"message": "Business created successfully"}, status=status.HTTP_201_CREATED)
+                    if type == "2":
+                        client = Client.objects.create(phone=request.data["client_phone"],
+                                                       city=request.data["client_city"],
+                                                       postcode=request.data["client_postcode"],
+                                                       street=request.data["client_street"],
+                                                       owner=user)
+                        client.save()
+                        # send_email_instance = SendEmail()
+                        # send_email_instance.send_email(recipient=user.email, token=token)
+                        return Response({"message": "Client created successfully"}, status=status.HTTP_201_CREATED)
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -67,19 +84,16 @@ class UserLogoutView(APIView):
         return response
 
 
-def userdelete(request, token):
-    try:
-        score = UserToken.objects.get(token=token)
-    except UserToken.DoesNotExist:
-        return render(request, "user_not_found.html")
+class Userdelete(APIView):
+    def delete(self, request):
+        token = request.data["token"]
+        try:
+            score = UserToken.objects.get(token=token)
+        except:
+            return Response({"message": "Not found"}, status=status.HTTP_404_NOT_FOUND)
+        user = User.objects.get(username=score.owner)
+        print(user)
+        user.delete()
+        score.delete()
 
-    user = User.objects.get(username=score.owner)
-    print(user)
-    user.delete()
-    score.delete()
-
-    return render(request, "user_deleted.html")
-
-
-def index(request):
-    return render(request, 'index.html')
+        return Response({"message": "User has been destroyed"}, status=status.HTTP_200_OK)
