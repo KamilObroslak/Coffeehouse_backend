@@ -21,10 +21,6 @@ from client.serializers import ClientSerializer
 
 class ClientLogin(APIView):
 
-    @method_decorator(never_cache)
-    def get(self, request):
-        return render(request, 'client_login.html')
-
     def post(self, request):
         username = request.data.get("username")
         password = request.data.get("password")
@@ -42,23 +38,7 @@ class ClientLogin(APIView):
 
         auth.login(request, user)
 
-        payload = {
-            'id': user.id,
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=60),
-            'iat': datetime.datetime.utcnow()
-        }
-
-        token = jwt.encode(payload, "secret", algorithm="HS256")
-
-        owner = User.objects.get(id=user.id)
-        client = Client.objects.get(owner=owner)
-
-        request.session["id"] = {
-            "user_id": user.id
-        }
-
-        return redirect(f"http://127.0.0.1:8000/core/client/{client.id}/", id=user.id)
-        #return None
+        return Response({"message" : "OK"}, status=status.HTTP_200_OK)
 
 
 class ClientViewSet(viewsets.ModelViewSet):
@@ -67,10 +47,13 @@ class ClientViewSet(viewsets.ModelViewSet):
 
 
 class ClientForMe(APIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
     def get(self, request, id):
         client = get_object_or_404(Client, id=id)
         serializer = ClientSerializer(client)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ProvidersForMe(APIView):
@@ -87,27 +70,36 @@ class ProvidersForMe(APIView):
                 providers = Provider.objects.all()
 
             serializer = ProvidersForClientSerializer(providers, many=True)
-            return Response(serializer.data)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         except Client.DoesNotExist:
-            return Response({"message": "Client not found"})
+            return Response({"message": "Client not found"}, status=status.HTTP_404_NOT_FOUND)
 
 
 class ProviderForMe(APIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
     def get(self, request, client, provider):
         product = Product.objects.filter(owner__id=provider)
         serializer = ProductSerializer(product, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class SpotsForMe(APIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
     def get(self, request, client, provider):
         table = Place.objects.filter(owner__id=provider)
         serializer = PlaceSerializer(table, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class OrderHistoryClient(APIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
     def get(self, request, client):
         history = Order.objects.filter(owner=client)
         serializer = OrderSerializer(history, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)

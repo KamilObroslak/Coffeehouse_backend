@@ -52,19 +52,12 @@ class UpdateHours(APIView):
 
     def get(self, request, id):
         try:
-            business_data = request.session.get("id")
-            user_id = id
-            business_id = business_data["business"][0]["id"]
-
-            open_days_data = OpenDayProvider.objects.filter(owner_id=business_id).first()
-
-            return render(request, 'open_days.html', {
-                "user_id": business_id,
-                "business_data": business_data,
-                "open_days_data": open_days_data,
-            })
-        except UserToken.DoesNotExist:
-            return render(request, "user_not_found.html")
+            calendar = OpenDayProvider.objects.get(owner=id)
+            serializer = OpenDayProviderSerializer(calendar)
+            data = serializer.data
+            return Response(data, status=status.HTTP_200_OK)
+        except:
+            return Response({"message": "Not found"}, status=status.HTTP_404_NOT_FOUND)
 
     def post(self, request, id):
         print(request.data)
@@ -123,7 +116,7 @@ class UpdateHours(APIView):
             x.sunday_to = sunday_to
             x.save()
 
-            return Response({"message": "The data has been saved"})
+            return Response({"message": "The data has been saved"}, status=status.HTTP_200_OK)
 
         except OpenDayProvider.DoesNotExist:
 
@@ -182,7 +175,7 @@ class UpdateHours(APIView):
             )
             days_hours.save()
 
-            return Response({"message": "The data has been saved"})
+            return Response({"message": "The data has been saved"}, status=status.HTTP_200_OK)
 
 
 class OpenDayProviderViewSet(viewsets.ModelViewSet):
@@ -319,6 +312,9 @@ class UserDeleteView(APIView):
 
 
 class NewOrderView(APIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
     def post(self, request, client, provider, spot):
         print(request.data)
         spot_number = spot
@@ -398,22 +394,18 @@ class NewOrderView(APIView):
         order.total_price = total_price_order
         order.status = 1
         order.save()
-        recipient = User.objects.get(username=provider.owner)
-        send_email_instance = SendOrderEmail()
-        send_email_instance.send_email(recipient=recipient.email)
+        # recipient = User.objects.get(username=provider.owner)
+        # send_email_instance = SendOrderEmail()
+        # send_email_instance.send_email(recipient=recipient.email)
 
-        return Response({"message": "Order created successfully"})
+        return Response({"message": "Order created successfully"}, status=status.HTTP_200_OK)
 
 
 class OrderUpdateView(APIView):
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, id, order):
-        return render(request, 'change_status.html')
-
     def post(self, request, id, order):
-        print(request.data)
         new_status = request.data["new_status"]
         order_obj = Order.objects.get(id=order)
         now = datetime.now()
@@ -421,15 +413,23 @@ class OrderUpdateView(APIView):
         order_obj.save()
         order_history = OrderHistory.objects.create(order_id=order_obj, time_of_change=now, status=new_status)
         order_history.save()
-        return Response({"message": "Order has been changed"})
+        return Response({"message": "Order has been changed"}, status=status.HTTP_200_OK)
+
+
+class CoffeeView(generics.ListAPIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = CoffeeSerializer
+
+    def get_queryset(self):
+        id = self.kwargs["id"]
+        coffees = Coffee.objects.filter(owner=id)
+        return coffees
 
 
 class AddCoffeeView(APIView):
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]
-
-    def get(self, request, id):
-        return render(request, 'add_coffee.html')
 
     def post(self, request, id):
         print(request.data)
@@ -456,17 +456,14 @@ class AddCoffeeView(APIView):
                                        owner=owner,
                                        active=active)
         coffee.save()
-        return Response({"message": "Coffee has been saved"})
+        return Response({"message": "Coffee has been saved"}, status=status.HTTP_200_OK)
 
 
 class EditCoffeeView(APIView):
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, id, coffee):
-        return render(request, 'edit_coffee.html')
-
-    def post(self, request, id, coffee):
+    def patch(self, request, id, coffee):
         print(request.data)
         name = request.data["name"]
         price = request.data["price"]
@@ -483,7 +480,7 @@ class EditCoffeeView(APIView):
         x.active = active
         x.save()
 
-        return Response({"message": "The data has been saved"})
+        return Response({"message": "The data has been saved"}, status=status.HTTP_200_OK)
 
 
 class DeleteCoffeeView(APIView):
@@ -491,25 +488,28 @@ class DeleteCoffeeView(APIView):
     permission_classes = [IsAuthenticated]
 
     def delete(self, request, id, coffee):
-        print(request.data)
-        token = request.data["token"]
-        x = Coffee.objects.get(id=coffee)
-        check = UserToken.objects.get(owner=id, token=token)
-        if check:
-            if x:
-                x.delete()
-                return Response({"message": "Object destroyed successfully"})
-            else:
-                return Response({"message": "Object not found"}, status=status.HTTP_404_NOT_FOUND)
-        return Response({"message": "Object not found"}, status=status.HTTP_404_NOT_FOUND)
+        try:
+            x = Coffee.objects.get(id=coffee)
+            x.delete()
+            return Response({"message": "Object destroyed successfully"}, status=status.HTTP_200_OK)
+        except Coffee.DoesNotExist:
+            return Response({"message": "Object not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+class CakesView(generics.ListAPIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = CakeSerializer
+
+    def get_queryset(self):
+        id = self.kwargs["id"]
+        cakes = Cake.objects.filter(owner=id)
+        return cakes
 
 
 class AddCakeView(APIView):
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]
-
-    def get(self, request, id):
-        return render(request, 'add_cake.html')
 
     def post(self, request, id):
         print(request.data)
@@ -535,17 +535,14 @@ class AddCakeView(APIView):
                                    owner=owner,
                                    active=active)
         cake.save()
-        return Response({"message": "Cake has been saved"})
+        return Response({"message": "Cake has been saved"}, status=status.HTTP_200_OK)
 
 
 class EditCakeView(APIView):
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, id, cake):
-        return render(request, 'edit_cake.html')
-
-    def post(self, request, id, cake):
+    def patch(self, request, id, cake):
         print(request.data)
         name = request.data["name"]
         price = request.data["price"]
@@ -562,7 +559,7 @@ class EditCakeView(APIView):
         x.active = active
         x.save()
 
-        return Response({"message": "The data has been saved"})
+        return Response({"message": "The data has been saved"}, status=status.HTTP_200_OK)
 
 
 class DeleteCakeView(APIView):
@@ -570,25 +567,28 @@ class DeleteCakeView(APIView):
     permission_classes = [IsAuthenticated]
 
     def delete(self, request, id, cake):
-        print(request.data)
-        token = request.data["token"]
-        x = Cake.objects.get(id=cake)
-        check = UserToken.objects.get(owner=id, token=token)
-        if check:
-            if x:
-                x.delete()
-                return Response({"message": "Object destroyed successfully"})
-            else:
-                return Response({"message": "Object not found"}, status=status.HTTP_404_NOT_FOUND)
-        return Response({"message": "Object not found"}, status=status.HTTP_404_NOT_FOUND)
+        try:
+            x = Cake.objects.get(id=cake)
+            x.delete()
+            return Response({"message": "Object destroyed successfully"}, status=status.HTTP_200_OK)
+        except Cake.DoesNotExist:
+            return Response({"message": "Object not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+class SnacksView(generics.ListAPIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = SnackSerializer
+
+    def get_queryset(self):
+        id = self.kwargs["id"]
+        snacks = Snacks.objects.filter(owner=id)
+        return snacks
 
 
 class AddSnackView(APIView):
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]
-
-    def get(self, request, id):
-        return render(request, 'add_snack.html')
 
     def post(self, request, id):
         print(request.data)
@@ -614,17 +614,14 @@ class AddSnackView(APIView):
                                       owner=owner,
                                       active=active)
         snack.save()
-        return Response({"message": "Snack has been saved"})
+        return Response({"message": "Snack has been saved"}, status=status.HTTP_200_OK)
 
 
 class EditSnackView(APIView):
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, id, snack):
-        return render(request, 'edit_snack.html')
-
-    def post(self, request, id, snack):
+    def patch(self, request, id, snack):
         print(request.data)
         name = request.data["name"]
         price = request.data["price"]
@@ -649,7 +646,7 @@ class EditSnackView(APIView):
         x.active = active
         x.save()
 
-        return Response({"message": "The data has been saved"})
+        return Response({"message": "The data has been saved"}, status=status.HTTP_200_OK)
 
 
 class DeleteSnackView(APIView):
@@ -657,17 +654,12 @@ class DeleteSnackView(APIView):
     permission_classes = [IsAuthenticated]
 
     def delete(self, request, id, snack):
-        print(request.data)
-        token = request.data["token"]
-        x = Snacks.objects.get(id=snack)
-        check = UserToken.objects.get(owner=id, token=token)
-        if check:
-            if x:
-                x.delete()
-                return Response({"message": "Object destroyed successfully"})
-            else:
-                return Response({"message": "Object not found"}, status=status.HTTP_404_NOT_FOUND)
-        return Response({"message": "Object not found"}, status=status.HTTP_404_NOT_FOUND)
+        try:
+            x = Snacks.objects.get(id=snack)
+            x.delete()
+            return Response({"message": "Object destroyed successfully"}, status=status.HTTP_200_OK)
+        except Snacks.DoesNotExist:
+            return Response({"message": "Object not found"}, status=status.HTTP_404_NOT_FOUND)
 
 
 class PlacesView(generics.ListAPIView):
@@ -697,17 +689,14 @@ class AddPlaceView(APIView):
                                      availability=availability,
                                      owner=owner)
         place.save()
-        return Response({"message": "Place has been saved"})
+        return Response({"message": "Place has been saved"}, status=status.HTTP_200_OK)
 
 
 class EditPlaceView(APIView):
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, id, place):
-        return render(request, 'edit_place.html')
-
-    def post(self, request, id, place):
+    def patch(self, request, id, place):
         print(request.data)
         spot_amount = request.data["spot_amount"]
         name = request.data["name"]
@@ -722,7 +711,7 @@ class EditPlaceView(APIView):
         x.owner = owner
         x.save()
 
-        return Response({"message": "The data has been saved"})
+        return Response({"message": "The data has been saved"}, status=status.HTTP_200_OK)
 
 
 class DeletePlaceView(APIView):
@@ -730,56 +719,33 @@ class DeletePlaceView(APIView):
     permission_classes = [IsAuthenticated]
 
     def delete(self, request, id, place):
-        print(request.data)
-        token = request.data["token"]
-        x = Place.objects.get(id=place)
-        check = UserToken.objects.get(owner=id, token=token)
-        if check:
-            if x:
-                x.delete()
-                return Response({"message": "Object destroyed successfully"})
-            else:
-                return Response({"message": "Object not found"}, status=status.HTTP_404_NOT_FOUND)
-        return Response({"message": "Object not found"}, status=status.HTTP_404_NOT_FOUND)
+        try:
+            x = Place.objects.get(id=place)
+            x.delete()
+            return Response({"message": "Object destroyed successfully"}, status=status.HTTP_200_OK)
+        except Place.DoesNotExist:
+            return Response({"message": "Object not found"}, status=status.HTTP_404_NOT_FOUND)
 
 
 class ProviderView(APIView):
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
-    @method_decorator(never_cache)
     def get(self, request, id):
         try:
-            business_data = request.session.get("id")
-            # import pdb;pdb.set_trace()
-            user_id = id
-            business_id = business_data["business"][0]["id"]
-            open_days = OpenDayProvider.objects.get(owner__id=business_id)
-            return render(request, 'provider.html', {
-                "user_id": business_id,
-                "business_data": business_data,
-                "open_days": OpenDayProvider.objects.get(owner__id=business_id)
-            })
-        except UserToken.DoesNotExist:
-            return render(request, "user_not_found.html")
+            provider = Provider.objects.get(id=id)
+            serializer = ProviderSerializer(provider)
+            data = serializer.data
+            return Response(data, status=status.HTTP_200_OK)
+        except:
+            return Response({"message": "Not found"}, status=status.HTTP_404_NOT_FOUND)
 
 
 class ProviderOrders(generics.ListAPIView):
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]
-    serializer_class = OrderSerializer
 
-    # def get(self, request, id):
-    #     business_data = request.session.get("id")
-    #     business_id = business_data["business"][0]["id"]
-    #
-    #     try:
-    #         orders = OrderHistory.objects.filter(order_id__business_id=business_id)
-    #         return render(request, 'ordershistory.html', {
-    #             "orders": orders
-    #         })
-    #     except OrderHistory.DoesNotExist:
-    #         print("brak historii")
+    serializer_class = OrderSerializer
 
     def get_queryset(self):
         id = self.kwargs["id"]
@@ -788,10 +754,8 @@ class ProviderOrders(generics.ListAPIView):
 
 
 class ProviderLoginView(APIView):
-
-    def get(self, request):
-
-        return render(request, 'biz_login.html')
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
         username = request.data.get("username")
@@ -810,31 +774,4 @@ class ProviderLoginView(APIView):
 
         auth.login(request, user)
 
-        payload = {
-            'id': user.id,
-            'exp': datetime.utcnow() + timedelta(minutes=60),
-            'iat': datetime.utcnow()
-        }
-
-        token = jwt.encode(payload, "secret", algorithm="HS256")
-
-        owner = User.objects.get(id=user.id)
-        provider = Provider.objects.get(owner=owner)
-        business = None
-        product = None
-
-        try:
-            business = Provider.objects.filter(owner=owner.id)
-            for i in business:
-                product = Product.objects.filter(owner=i)
-        except Provider.DoesNotExist:
-            pass
-
-        request.session["id"] = {
-            "user_id": user.id,
-            "business": ProviderSerializer(business, context={"request": request},
-                                           many=True).data if business else None,
-            "coffees": CoffeeSerializer(product, context={"request": request}, many=True).data if product else None
-        }
-
-        return redirect(f"http://127.0.0.1:8000/core/biz/{provider.id}/", id=user.id)
+        return Response({"message": "OK"}, status=status.HTTP_200_OK)
