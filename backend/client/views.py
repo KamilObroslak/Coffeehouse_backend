@@ -1,11 +1,5 @@
-import datetime
-
 from django.contrib import auth
-from django.contrib.auth.models import User
-from django.shortcuts import render, redirect, get_object_or_404
-import jwt as jwt
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import never_cache
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated

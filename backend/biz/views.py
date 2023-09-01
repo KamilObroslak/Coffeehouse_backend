@@ -1,16 +1,12 @@
 import datetime
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from django.core.exceptions import ObjectDoesNotExist
-from django.shortcuts import render, redirect
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import never_cache
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 
 from biz.models import Provider, OpenDayProvider, Product
 from client.models import Client
-from core.messages import SendOrderEmail
 from core.models import UserToken
 
 import jwt as jwt
@@ -235,8 +231,6 @@ class OrderHistorySet(viewsets.ModelViewSet):
 
 class UserRegisterView(APIView):
     def post(self, request):
-        print(request.data)
-        print("test")
         context = {}
         if request.method == "POST":
             try:
@@ -432,7 +426,6 @@ class AddCoffeeView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, id):
-        print(request.data)
         name = request.data["name"]
         price = request.data["price"]
         description = request.data["description"]
@@ -464,7 +457,6 @@ class EditCoffeeView(APIView):
     permission_classes = [IsAuthenticated]
 
     def patch(self, request, id, coffee):
-        print(request.data)
         name = request.data["name"]
         price = request.data["price"]
         description = request.data["description"]
@@ -512,7 +504,6 @@ class AddCakeView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, id):
-        print(request.data)
         name = request.data["name"]
         price = request.data["price"]
         description = request.data["description"]
@@ -543,7 +534,6 @@ class EditCakeView(APIView):
     permission_classes = [IsAuthenticated]
 
     def patch(self, request, id, cake):
-        print(request.data)
         name = request.data["name"]
         price = request.data["price"]
         description = request.data["description"]
@@ -591,7 +581,6 @@ class AddSnackView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, id):
-        print(request.data)
         name = request.data["name"]
         price = request.data["price"]
         description = request.data["description"]
@@ -622,7 +611,6 @@ class EditSnackView(APIView):
     permission_classes = [IsAuthenticated]
 
     def patch(self, request, id, snack):
-        print(request.data)
         name = request.data["name"]
         price = request.data["price"]
         description = request.data["description"]
@@ -678,7 +666,6 @@ class AddPlaceView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, id):
-        print(request.data)
         spot_amount = request.data["spot_amount"]
         name = request.data["name"]
         availability = request.data["availability"]
@@ -697,7 +684,6 @@ class EditPlaceView(APIView):
     permission_classes = [IsAuthenticated]
 
     def patch(self, request, id, place):
-        print(request.data)
         spot_amount = request.data["spot_amount"]
         name = request.data["name"]
         availability = request.data["availability"]

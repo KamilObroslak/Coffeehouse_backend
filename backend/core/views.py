@@ -12,10 +12,8 @@ from rest_framework import status
 
 def create_limited_permissions_group():
     group, created = Group.objects.get_or_create(name="Basic User")
-
     admin_group = Group.objects.get(name="User")
     permissions = admin_group.permissions.all()
-
     group.permissions.set(permissions)
 
     return group
@@ -24,8 +22,6 @@ def create_limited_permissions_group():
 class UserRegisterView(APIView):
 
     def post(self, request):
-        print(request.data)
-        print("test")
         context = {}
         if request.method == "POST":
             try:
@@ -92,7 +88,6 @@ class Userdelete(APIView):
         except:
             return Response({"message": "Not found"}, status=status.HTTP_404_NOT_FOUND)
         user = User.objects.get(username=score.owner)
-        print(user)
         user.delete()
         score.delete()
 
