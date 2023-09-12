@@ -1,40 +1,29 @@
 import datetime
 from datetime import datetime
+import jwt as jwt
 
 from django.core.exceptions import ObjectDoesNotExist
-from rest_framework.authentication import SessionAuthentication
-from rest_framework.permissions import IsAuthenticated
-
-from biz.models import Provider, OpenDayProvider, Product
-from client.models import Client
-from core.models import UserToken
-
-import jwt as jwt
 from django.contrib import auth
-from django.contrib.auth.models import Group, User
+from django.contrib.auth.models import User
+
+from rest_framework import viewsets, status, generics
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Coffee, Cake, Place, Order, OrderCoffee, \
     OrderSnacks, Snacks, OrderCake, OrderHistory
-from rest_framework import viewsets, status, generics
+from biz.models import Provider, OpenDayProvider, Product
+from client.models import Client
+from core.models import UserToken
+
 
 from .serializers import CoffeeSerializer, CakeSerializer, OpenDayProviderSerializer, \
     ProductSerializer, ProviderSerializer, SnackSerializer, PlaceSerializer, \
     OrderSerializer, OrderCoffeeSerializer, OrderCakeSerializer, \
     OrderSnackSerializer, OrderHistorySerializer
-
-
-def create_limited_permissions_group():
-    group, created = Group.objects.get_or_create(name="Basic User")
-
-    admin_group = Group.objects.get(name="User")
-    permissions = admin_group.permissions.all()
-
-    group.permissions.set(permissions)
-
-    return group
 
 
 class BusinessViewSet(viewsets.ModelViewSet):
@@ -56,8 +45,6 @@ class UpdateHours(APIView):
             return Response({"message": "Not found"}, status=status.HTTP_404_NOT_FOUND)
 
     def post(self, request, id):
-        print(request.data)
-        print("test")
         try:
             x = OpenDayProvider.objects.get(owner=id)
 
@@ -309,21 +296,21 @@ class NewOrderView(APIView):
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, client, provider, spot):
-        print(request.data)
-        spot_number = spot
+    def post(self, request, client, provider):
         customer_order = request.data["customer_order"]
         takeaway_order = request.data["takeaway_order"]
         owner_id = client
         provider_id = provider
 
         client = Client.objects.get(id=owner_id)
-        spot = Place.objects.get(id=spot_number)
         provider = Provider.objects.get(id=provider_id)
         total_price = 0
         price_for_coffees = 0
         price_for_cakes = 0
         price_for_snacks = 0
+
+        place = request.data["place"]
+        spot = Place.objects.get(id=place)
 
         order = Order.objects.create(
             spot=spot,
@@ -336,10 +323,10 @@ class NewOrderView(APIView):
         # Coffees
         coffees = customer_order["coffees"]
         for coffee_data in coffees:
-            coffee_name = coffee_data["name"]
+            coffee_id = coffee_data["coffee_id"]
             coffee_quantity = coffee_data["quantity"]
             try:
-                coffee = Coffee.objects.get(name=coffee_name, owner=provider)
+                coffee = Coffee.objects.get(id=coffee_id, owner=provider)
                 price_for_coffees += coffee_quantity * coffee.price
                 OrderCoffee.objects.create(
                     order=order,
@@ -353,10 +340,10 @@ class NewOrderView(APIView):
         # Cakes
         cakes = customer_order["cakes"]
         for cake_data in cakes:
-            cake_name = cake_data["name"]
+            cake_id = cake_data["cake_id"]
             cake_quantity = cake_data["quantity"]
             try:
-                cake = Cake.objects.get(name=cake_name, owner=provider)
+                cake = Cake.objects.get(id=cake_id, owner=provider)
                 price_for_cakes += cake_quantity * cake.price
                 OrderCake.objects.create(
                     order=order,
@@ -370,10 +357,10 @@ class NewOrderView(APIView):
         # Snacks
         snacks = customer_order["snacks"]
         for snack_data in snacks:
-            snack_name = snack_data['name']
+            snack_id = snack_data['snack_id']
             snack_quantity = snack_data["quantity"]
             try:
-                snack = Snacks.objects.get(name=snack_name, owner=provider)
+                snack = Snacks.objects.get(name=snack_id, owner=provider)
                 price_for_snacks += snack_quantity * snack.price
                 OrderSnacks.objects.create(
                     order=order,
@@ -727,6 +714,42 @@ class ProviderView(APIView):
             return Response({"message": "Not found"}, status=status.HTTP_404_NOT_FOUND)
 
 
+class EditBusinessView(APIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, id):
+        try:
+            user = User.objects.get(id=id)
+            business = Provider.objects.get(owner=user)
+
+            name = request.data["name"]
+            city = request.data["city"]
+            postcode = request.data["postcode"]
+            street = request.data["street"]
+            kind = request.data["kind"]
+            description = request.data["description"]
+            facebook_link = request.data["facebook_link"]
+            instagram_link = request.data["instagram_link"]
+
+            business.name = name
+            business.city = city
+            business.postcode = postcode
+            business.street = street
+            business.kind = kind
+            business.owner = user
+            business.description = description
+            business.facebook_link = facebook_link
+            business.instagram_link = instagram_link
+            business.save()
+
+            return Response({"message": "The data has been saved"}, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return Response({"message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Provider.DoesNotExist:
+            return Response({"message": "Provider not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
 class ProviderOrders(generics.ListAPIView):
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]
@@ -735,7 +758,8 @@ class ProviderOrders(generics.ListAPIView):
 
     def get_queryset(self):
         id = self.kwargs["id"]
-        orders = Order.objects.filter(provider=id)
+        provider = Provider.objects.get(id=id)
+        orders = Order.objects.filter(provider=provider)
         return orders
 
 

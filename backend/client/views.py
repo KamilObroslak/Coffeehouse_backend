@@ -1,5 +1,7 @@
 from django.contrib import auth
 from django.shortcuts import get_object_or_404
+from django.contrib.auth.models import User
+
 from rest_framework import viewsets, status
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -9,6 +11,7 @@ from rest_framework.views import APIView
 from biz.models import Provider, Product, Place, Order
 from biz.serializers import ProvidersForClientSerializer, \
     ProductSerializer, PlaceSerializer, OrderSerializer
+
 from client.models import Client
 from client.serializers import ClientSerializer
 
@@ -48,6 +51,35 @@ class ClientForMe(APIView):
         client = get_object_or_404(Client, id=id)
         serializer = ClientSerializer(client)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class EditClientView(APIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, id):
+        try:
+            client = Client.objects.get(id=id)
+            user = User.objects.get(username=client)
+
+            phone = request.data["phone"]
+            city = request.data["city"]
+            postcode = request.data["city"]
+            street = request.data["street"]
+
+            client.phone = phone
+            client.city = city
+            client.postcode = postcode
+            client.street = street
+            client.owner = user
+
+            client.save()
+
+            return Response({"message": "The data has been saved"}, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return Response({"message": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Client.DoesNotExist:
+            return Response({"message": "Client not found"}, status=status.HTTP_404_NOT_FOUND)
 
 
 class ProvidersForMe(APIView):

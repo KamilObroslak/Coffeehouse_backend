@@ -4,7 +4,6 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 import jinja2
-from jinja2 import Template
 
 
 class Message:
@@ -37,7 +36,6 @@ class SendEmail:
         smtp_serwer = "smtp.gmail.com"
         sender = "kamilobroslak1@gmail.com"
         recipient = str(recipient)  # mail do testów formy maila i czy maile wychodza
-        print(recipient)
         password = "disbxlwfqyjhefvd"  # przy wpisaniu hasła do konta google maile wychodzą i nie pojawia się błąd
         subject = "Cześć! Cieszymy się że jesteś z nami :)"
 

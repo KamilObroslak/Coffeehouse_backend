@@ -1,19 +1,19 @@
 from django.contrib import auth
 from django.contrib.auth.models import Group, User
 
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from .models import UserToken
 from biz.models import Provider
 from client.models import Client
-from .models import UserToken
-from rest_framework import status
 
 
 def create_limited_permissions_group():
+    basic_group = Group.objects.get(name="Basic User")
     group, created = Group.objects.get_or_create(name="Basic User")
-    admin_group = Group.objects.get(name="User")
-    permissions = admin_group.permissions.all()
+    permissions = basic_group.permissions.all()
     group.permissions.set(permissions)
 
     return group

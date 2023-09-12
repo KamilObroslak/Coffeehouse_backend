@@ -172,7 +172,6 @@ class ProviderAdmin(ImportExportModelAdmin ,admin.ModelAdmin):
     reminder.short_description = "Wyślij przypomnienie"
 
 
-
 admin.site.register(Provider, ProviderAdmin)
 admin.site.register(OpenDayProvider, OpenDayProviderAdmin)
 admin.site.register(Place, PlaceAdmin)

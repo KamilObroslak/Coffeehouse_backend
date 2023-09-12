@@ -125,7 +125,7 @@ class OrderStatus(models.IntegerChoices):
 
 
 class Order(models.Model):
-    spot = models.ForeignKey(Place, on_delete=models.CASCADE, verbose_name="spot", blank=True)
+    spot = models.ForeignKey(Place, on_delete=models.CASCADE, verbose_name="spot", blank=True, null=True)
     total_price = models.FloatField(verbose_name="total price")
     coffees = models.ManyToManyField(Coffee, through='OrderCoffee', verbose_name="coffees")
     cakes = models.ManyToManyField(Cake, through='OrderCake', verbose_name="cakes")
