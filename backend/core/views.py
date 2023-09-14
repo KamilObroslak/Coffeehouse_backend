@@ -1,3 +1,5 @@
+from enum import Enum
+
 from django.contrib import auth
 from django.contrib.auth.models import Group, User
 
@@ -10,12 +12,14 @@ from biz.models import Provider
 from client.models import Client
 
 
-def create_limited_permissions_group():
-    basic_group = Group.objects.get(name="Basic User")
-    group, created = Group.objects.get_or_create(name="Basic User")
-    permissions = basic_group.permissions.all()
-    group.permissions.set(permissions)
+class BusinessType(Enum):
+    business = "business"
+    client = "client"
 
+
+def create_limited_permissions_group():
+    group, created = Group.objects.get_or_create(name="Basic User")
+    group.permissions.add()
     return group
 
 
@@ -37,11 +41,14 @@ class UserRegisterView(APIView):
                                                     email=request.data["email"],
                                                     password=request.data["password"],
                                                     is_staff=True)
+                    group = create_limited_permissions_group()
+                    user.groups.add(group)
+                    user.save()
                     token = UserToken(owner=user)
                     token.save()
                     auth.login(request, user)
                     type = request.data["type"]
-                    if type == "1":
+                    if type == BusinessType.business.value:
                         kind = request.data["business_kind"]
                         provider = Provider.objects.create(name=request.data["business_name"],
                                                            city=request.data["business_city"],
@@ -56,7 +63,7 @@ class UserRegisterView(APIView):
                         # send_email_instance = SendEmail()
                         # send_email_instance.send_email(recipient=user.email, token=token)
                         return Response({"message": "Business created successfully"}, status=status.HTTP_201_CREATED)
-                    if type == "2":
+                    elif type == BusinessType.client.value:
                         client = Client.objects.create(phone=request.data["client_phone"],
                                                        city=request.data["client_city"],
                                                        postcode=request.data["client_postcode"],
@@ -66,6 +73,9 @@ class UserRegisterView(APIView):
                         # send_email_instance = SendEmail()
                         # send_email_instance.send_email(recipient=user.email, token=token)
                         return Response({"message": "Client created successfully"}, status=status.HTTP_201_CREATED)
+                    else:
+                        # Niepoprawna wartość 'type'
+                        return Response({'error': 'Invalid user type'}, status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
